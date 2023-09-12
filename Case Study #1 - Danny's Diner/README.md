@@ -1,5 +1,7 @@
+![Danny's Diner](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/4ef18033-2b1c-4efe-8591-39adfe66dcb1)
 
-**Query #1**
+
+### Sales Table
 
     SELECT *
     FROM dannys_diner.sales;
@@ -23,7 +25,7 @@
 | C           | 2021-01-07T00:00:00.000Z | 3          |
 
 ---
-**Query #2**
+### Menu Table
 
     SELECT *
     FROM dannys_diner.menu;
@@ -35,7 +37,7 @@
 | 3          | ramen        | 12    |
 
 ---
-**Query #3**
+### Members Table
 
     SELECT *
     FROM dannys_diner.members;
@@ -46,7 +48,7 @@
 | B           | 2021-01-09T00:00:00.000Z |
 
 ---
-**Query #4**
+### 1. What is the total amount each customer spent at the restaurant?
 
     SELECT
     	s.customer_id,
@@ -64,7 +66,7 @@
 | C           | 36          |
 
 ---
-**Query #5**
+### 2. How many days has each customer visited the restaurant?
 
     SELECT
     	customer_id,
@@ -80,7 +82,7 @@
 | C           | 2     |
 
 ---
-**Query #6**
+### 3. What was the first item from the menu purchased by each customer?
 
     SELECT
         customer_id,
@@ -95,8 +97,6 @@
 | B           | 2021-01-01T00:00:00.000Z |
 | C           | 2021-01-01T00:00:00.000Z |
 
----
-**Query #7**
 
     SELECT
     	s.customer_id,
@@ -116,7 +116,7 @@
 | C           | ramen        |
 
 ---
-**Query #8**
+### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
     WITH product_count AS (
       SELECT product_id,
@@ -138,7 +138,7 @@
 | ramen        | 8               |
 
 ---
-**Query #9**
+### 5. Which item was the most popular for each customer?
 
     WITH purchased AS(
     	SELECT customer_id,
