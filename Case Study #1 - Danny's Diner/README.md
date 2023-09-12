@@ -303,6 +303,44 @@
 | B           | 820                    |
 
 ---
+**Query #9**
+
+    SELECT s.customer_id,
+    	s.order_date,
+        u.product_name,
+        u.price,
+        CASE WHEN s.order_date >= m.join_date
+        THEN 'Y'
+        WHEN s.order_date < m.join_date
+        THEN 'N'
+        ELSE 'N' END AS member
+    FROM dannys_diner.sales AS s
+    JOIN dannys_diner.menu AS u
+    ON s.product_id = u.product_id
+    FULL JOIN dannys_diner.members AS m
+    ON s.customer_id = m.customer_id
+    ORDER BY s.customer_id;
+
+| customer_id | order_date               | product_name | price | member |
+| ----------- | ------------------------ | ------------ | ----- | ------ |
+| A           | 2021-01-07T00:00:00.000Z | curry        | 15    | Y      |
+| A           | 2021-01-11T00:00:00.000Z | ramen        | 12    | Y      |
+| A           | 2021-01-11T00:00:00.000Z | ramen        | 12    | Y      |
+| A           | 2021-01-10T00:00:00.000Z | ramen        | 12    | Y      |
+| A           | 2021-01-01T00:00:00.000Z | sushi        | 10    | N      |
+| A           | 2021-01-01T00:00:00.000Z | curry        | 15    | N      |
+| B           | 2021-01-04T00:00:00.000Z | sushi        | 10    | N      |
+| B           | 2021-01-11T00:00:00.000Z | sushi        | 10    | Y      |
+| B           | 2021-01-01T00:00:00.000Z | curry        | 15    | N      |
+| B           | 2021-01-02T00:00:00.000Z | curry        | 15    | N      |
+| B           | 2021-01-16T00:00:00.000Z | ramen        | 12    | Y      |
+| B           | 2021-02-01T00:00:00.000Z | ramen        | 12    | Y      |
+| C           | 2021-01-01T00:00:00.000Z | ramen        | 12    | N      |
+| C           | 2021-01-01T00:00:00.000Z | ramen        | 12    | N      |
+| C           | 2021-01-07T00:00:00.000Z | ramen        | 12    | N      |
+
+---
+
 
 
 
