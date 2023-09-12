@@ -170,4 +170,140 @@
 
 ---
 
-[View on DB Fiddle](https://www.db-fiddle.com/f/2rM8RAnq7h5LLDTzZiRWcd/5358)
+### 6. Which item was purchased first by the customer after they became a member?
+
+    WITH order_rank AS (
+     	SELECT s.customer_id,
+    			s.order_date,
+            	s.product_id,
+      			DENSE_RANK() OVER(
+                  PARTITION BY s.customer_id
+                  ORDER BY s.order_date) AS rank
+    	FROM dannys_diner.sales AS s
+    	JOIN dannys_diner.members AS m
+    	ON s.customer_id = m.customer_id
+    	WHERE s.order_date > m.join_date
+    	ORDER BY s.customer_id)
+        
+    SELECT r.customer_id,
+    	m.product_name AS first_purchase_after_member
+    FROM order_rank AS r
+    JOIN dannys_diner.menu as m
+    ON r.product_id = m.product_id
+    WHERE r.rank = 1
+    ORDER BY customer_id;
+
+| customer_id | first_purchase_after_member |
+| ----------- | --------------------------- |
+| A           | ramen                       |
+| B           | sushi                       |
+
+---
+### 7. Which item was purchased just before the customer became a member?
+
+    WITH last_order AS (
+      SELECT s.customer_id,
+      		s.order_date,
+      		s.product_id,
+      		DENSE_RANK() OVER(
+              PARTITION BY s.customer_id
+              ORDER BY s.order_date DESC) AS rank
+      FROM dannys_diner.sales AS s
+      JOIN dannys_diner.members AS m
+      ON s.customer_id = m.customer_id
+      WHERE s.order_date <= m.join_date
+      ORDER BY s.customer_id)
+    
+    SELECT l.customer_id,
+    		m.product_name AS last_purchase_before_member
+    FROM last_order AS l
+    JOIN dannys_diner.menu AS m
+    ON l.product_id = m.product_id
+    WHERE l.rank = 1
+    ORDER BY l.customer_id;
+
+| customer_id | last_purchase_before_member |
+| ----------- | --------------------------- |
+| A           | curry                       |
+| B           | sushi                       |
+
+---
+### 8. What is the total items and amount spent for each member before they became a member?
+
+    SELECT s.customer_id,
+    		COUNT(s.*) AS total_items,
+            SUM(u.price) AS total_spent
+    FROM dannys_diner.sales AS s
+    JOIN dannys_diner.members AS m
+    ON s.customer_id = m.customer_id
+    JOIN dannys_diner.menu AS u
+    ON s.product_id = u.product_id
+    WHERE s.order_date <= m.join_date
+    GROUP BY s.customer_id
+    ORDER BY s.customer_id;
+
+| customer_id | total_items | total_spent |
+| ----------- | ----------- | ----------- |
+| A           | 3           | 40          |
+| B           | 3           | 40          |
+
+---
+### 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+
+    WITH points AS (
+      SELECT s.customer_id,
+      		CASE WHEN m.product_name = 'sushi'
+      			THEN 200
+      			ELSE m.price * 10 END AS points
+      FROM dannys_diner.sales AS s
+      JOIN dannys_diner.menu AS m
+      ON s.product_id = m.product_id)
+      
+    SELECT customer_id,
+      		SUM(points) AS total_points
+    FROM points
+    GROUP BY customer_id
+    ORDER BY customer_id;
+
+| customer_id | total_points |
+| ----------- | ------------ |
+| A           | 860          |
+| B           | 940          |
+| C           | 360          |
+
+---
+### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+
+    WITH points AS (
+    SELECT s.customer_id,
+    	s.product_id,
+    	u.price,
+    	CASE WHEN s.order_date BETWEEN m.join_date AND (m.join_date + 6) OR s.product_id = 1
+        	THEN u.price * 10 * 2
+      		WHEN s.order_date >= '2021-02-01'
+      		THEN 0
+            ELSE u.price * 10 END AS points
+    FROM dannys_diner.sales AS s
+    JOIN dannys_diner.menu AS u
+    ON s.product_id = u.product_id
+    JOIN dannys_diner.members AS m
+    ON s.customer_id = m.customer_id
+    WHERE s.customer_id IN ('A', 'B'))
+    
+    SELECT customer_id,
+    	SUM(points) AS points_with_multiplier
+    FROM points
+    GROUP BY customer_id
+    ORDER BY customer_id;
+
+| customer_id | points_with_multiplier |
+| ----------- | ---------------------- |
+| A           | 1370                   |
+| B           | 820                    |
+
+---
+
+
+
+
