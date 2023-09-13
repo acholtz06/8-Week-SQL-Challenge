@@ -11,6 +11,8 @@ Danny wants to take a closer look at the habits of his customers, such as spendi
 ## ⚠️ Data Limitations
 The biggest limitation I noticed with the data is the lack of timestamps. When looking at the first item purchased by a customer, I can't give a definitive answer when there are multiple purchases on the same day. The other limitation with the timestamps is determining exactly when a customer signed up for the rewards program. If a customer made a purchase and also joined the rewards program on the same day, I have no way of knowing if they joined before or after making the purchase. Because the double points period of the rewards system includes the join date, I considered any purchases made on the join date to be counted as a member purchase. This method was used for every question to keep everything consistent.
 
+Another limitation is the lack of data. It is hard to spot trends between three overall customers, and only two members. I believe that more insights could be gained if there were more customers.
+
 ## 🍛 Data
 There were three datasets provided for this case study:
 - sales
