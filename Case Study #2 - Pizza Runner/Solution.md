@@ -9,6 +9,9 @@
 
 ## 🍅 Data
 
+![Pizza Runner Data](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/ce45cbaa-f2ec-491d-a0db-7034c50be8df)
+
+
 ## 🧀 Data Cleaning
     UPDATE pizza_runner.customer_orders
     SET exclusions = NULL
