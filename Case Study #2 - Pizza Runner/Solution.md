@@ -1,3 +1,6 @@
+# 🍕 Case Study #2 - Pizza Runner
+
+![Pizza Runner Img](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/781423cd-5ac7-4c48-807f-c2678a274182)
 
     UPDATE pizza_runner.customer_orders
     SET exclusions = NULL
