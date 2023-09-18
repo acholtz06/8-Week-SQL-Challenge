@@ -454,6 +454,54 @@
 | Vegetarian | Tomatoes     |
 
 ---
+**Query #24**
+
+    WITH unnested AS (
+      SELECT order_id,
+      	pizza_id,
+      	(UNNEST(STRING_TO_ARRAY(extras, ',')))::INT AS extras
+      FROM pizza_runner.customer_orders)
+    
+    SELECT t.topping_name,
+    	COUNT(t.topping_name) AS times_added
+    FROM pizza_runner.customer_orders AS c
+    LEFT JOIN unnested AS u
+    ON c.order_id = u.order_id
+    JOIN pizza_runner.pizza_toppings AS t
+    ON u.extras = t.topping_id
+    GROUP BY t.topping_name
+    ORDER BY times_added DESC
+    LIMIT 1;
+
+| topping_name | times_added |
+| ------------ | ----------- |
+| Bacon        | 5           |
+
+---
+**Query #25**
+
+    WITH unnested AS (
+      SELECT order_id,
+      	pizza_id,
+      	(UNNEST(STRING_TO_ARRAY(exclusions, ',')))::INT AS exclusions
+      FROM pizza_runner.customer_orders)
+    
+    SELECT t.topping_name,
+    	COUNT(t.topping_name) AS times_excluded
+    FROM pizza_runner.customer_orders AS c
+    LEFT JOIN unnested AS u
+    ON c.order_id = u.order_id
+    JOIN pizza_runner.pizza_toppings AS t
+    ON u.exclusions = t.topping_id
+    GROUP BY t.topping_name
+    ORDER BY times_excluded DESC
+    LIMIT 1;
+
+| topping_name | times_excluded |
+| ------------ | -------------- |
+| Cheese       | 10             |
+
+---
 
 ### 💰 D. Pricing and Ratings
 
