@@ -420,7 +420,7 @@
 
 ### 🧄 C. Ingredient Optimisation
 
-**Query #23**
+#### 1. What are the standard ingredients for each pizza?
 
     WITH unnested AS (
       SELECT pizza_id,
@@ -454,7 +454,7 @@
 | Vegetarian | Tomatoes     |
 
 ---
-**Query #24**
+#### 2. What was the most commonly added extra?
 
     WITH unnested AS (
       SELECT order_id,
@@ -478,7 +478,7 @@
 | Bacon        | 5           |
 
 ---
-**Query #25**
+#### 3. What was the most common exclusion?
 
     WITH unnested AS (
       SELECT order_id,
