@@ -5,7 +5,11 @@
 
 ## ✏️ Business Task
 
+Danny has a pizza restaurant and he wants to expand his business by hiring runners to pick up pizzas from Pizza Runner Headquarters and deliver them right the the customer's home. He would like to take a look at how the runner system is working and see if it is worth expanding the program.
+
 ## ⚠️ Data Limitations
+
+
 
 ## 🍅 Data
 
@@ -72,6 +76,11 @@
     ALTER TABLE pizza_runner.runner_orders
     ALTER COLUMN duration_in_mins TYPE NUMERIC
     USING duration_in_mins::NUMERIC;
+
+There were several items that needed cleaned within the provided data:
+- There were columns in multiple tables that had null values as *null*, NULL, or '' - I updated all of these columns to reflect *null* uniformly
+- The values distance and duration columns of the runner_order table both were not formatted the same way (ex. 15km vs 15 kilometers vs 15). To fix this, I trimmed the columns of any version of abbreviations and then renamed the columns to reflect the units (distance_in_km and duration_in_mins)
+- A few of the columns were not the correct data type (changed pickup_time to TIMESTAMP, distnace_in_km to NUMERIC, duration_in_mins to NUMERIC)
 
 ## 🫑 Case Study Questions
 
