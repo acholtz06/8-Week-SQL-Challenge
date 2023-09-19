@@ -94,6 +94,12 @@ There were several items that needed cleaned within the provided data:
 | ------------------ |
 | 14                 |
 
+Steps:
+- Counted the number of pizza ids
+
+Insights:
+- There were 14 pizzas ordered through the runner program
+
 ---
 #### 2. How many unique customer orders were made?
 
@@ -103,6 +109,12 @@ There were several items that needed cleaned within the provided data:
 | num_orders |
 | ---------- |
 | 10         |
+
+Steps:
+- Counted the distinct order ids
+
+Insights:
+- There were 10 total orders made through the runner program
 
 ---
 #### 3. How many successful orders were delivered by each runner?
@@ -120,6 +132,15 @@ There were several items that needed cleaned within the provided data:
 | 2         | 3                     |
 | 3         | 1                     |
 
+Steps:
+- Counted the order ids
+- Grouped by the runner id to show the number of deliveries per runner
+- Filtered for orderes that were not cancelled
+
+Insights:
+- There is no real pattern for how many orders runners are taking
+- Runner 1 had the most successful deliveries
+- Runner 3 had the least successful deliveries
 ---
 #### 4. How many of each type of pizza was delivered?
 
@@ -137,6 +158,15 @@ There were several items that needed cleaned within the provided data:
 | 1        | 9             |
 | 2        | 3             |
 
+Steps:
+- Joined the customer_orders and the runner_orders tables in order to find which pizzas were ordered and if they were successfully delivered
+- Counted the pizza ids
+- Grouped by pizza_id to see how many of each pizza was delivered
+- Filtered for pizzas that were not cancelled
+
+Insights:
+- Looking at the rest of the data shows that pizza_id 1 is Meatlovers and pizza_id 2 is Vegetarian
+- pizza_id 1 (Meatlovers) is the more popular pizza
 ---
 #### 5. How many Vegetarian and Meatlovers were ordered by each customer?
 
@@ -161,6 +191,15 @@ There were several items that needed cleaned within the provided data:
 | 104         | Meatlovers | 3           |
 | 105         | Vegetarian | 1           |
 
+Steps:
+- Joined the customer_orders and the pizza_names tables to see which pizzas were ordered and what their names are
+- Counted the pizza names
+- Grouped by the customer id and pizza name to see how many of each pizza was ordered for each customer
+
+Insights:
+- Most customers have tried both pizzas
+- All but one customer prefers the Meatlovers pizza
+
 ---
 #### 6. What was the maximum number of pizzas delivered in a single order?
 
@@ -177,6 +216,17 @@ There were several items that needed cleaned within the provided data:
 | order_id | max_delivered |
 | -------- | ------------- |
 | 4        | 3             |
+
+Steps:
+- Joined the customer_orders and the runner_orders tables to see the pizzas in each order and whether or not they were delivered successfully
+- Counted the pizza ids
+- Grouped by the order id to see how many pizzas were in each order
+- Filtered for only successful deliveries
+- Ordered by the count in descending so that the order with the most pizzas was at the top
+- Limited the results to 1 to show the maximum number delivered
+
+Insights:
+- Orders through the pizza runner program all have 3 or fewer pizzas per order
 
 ---
 #### 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
@@ -208,6 +258,19 @@ There were several items that needed cleaned within the provided data:
 | 104         | No      | 1          |
 | 105         | Yes     | 1          |
 
+Steps:
+- Created a CTE called pizzas
+- Joined the customer_orders and the runner_orders tables to see the changes that were made as well as successful deliveries
+- Used a CASE statement to denote wheather a pizza had changes or not (any changes in the extras OR exclusions columns = 'Yes' and pizzas with no changes in either column = 'No')
+- Filtered for successful deliveries
+- Using the pizzas CTE, I counted the pizzas that had any changes
+- Grouped by the customer id to see the changes made for each individual customer
+
+Insights:
+- 3 customers made changes while 3 did not
+- Only customer 104 ordered pizzas with changes and without
+- Half of the pizzas ordered had changes
+  
 ---
 #### 8. How many pizzas were delivered that had both exclusions and extras?
 
@@ -229,6 +292,14 @@ There were several items that needed cleaned within the provided data:
 | num_pizzas |
 | ---------- |
 | 1          |
+
+Steps:
+- I used the same CTE as the problem above, except I changed the CASE statement to say AND instead of OR so that both the extras and the exclusions columns had to have changes
+- Using the pizzas CTE, I counted the number of pizzas in the changes column
+- Filtered for only pizzas where changes = 'Yes' (had both exlusions and extras)
+
+Insights:
+- Only 1 pizza was ordered that had both exlusions and extras
 
 ---
 #### 9. What was the total volume of pizzas ordered for each hour of the day?
@@ -281,6 +352,17 @@ There were several items that needed cleaned within the provided data:
 | 4       | Thursday    | 3          |
 | 5       | Friday      | 1          |
 | 6       | Saturday    | 5          |
+
+Steps:
+- Created a CTE called dow
+- Used EXTRACT() to get the day of the week from the order time
+- Used the dow CTE to create a CASE statement where I gave each dow number a name so that the table can be more easily interpreted by stakeholders
+- Counted the orders
+- Grouped by the day of week to see the number of pizzas ordered per day
+
+Insights:
+- Wednesdays and Saturdays are the busiest days for the pizza runner program
+- Friday is the slowest day for the pizza runner program
 
 ---
 
