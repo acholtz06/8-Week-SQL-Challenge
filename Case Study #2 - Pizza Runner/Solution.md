@@ -505,6 +505,113 @@
 
 ### 💰 D. Pricing and Ratings
 
+#### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+
+    WITH prices AS (
+      SELECT order_id,
+      	pizza_id,
+      	CASE WHEN pizza_id = 1 THEN 12
+      	ELSE 10 END AS price
+      FROM pizza_runner.customer_orders)
+    
+    
+    SELECT SUM(p.price) AS dollars
+    FROM prices AS p
+    JOIN pizza_runner.runner_orders AS r
+    	ON p.order_id = r.order_id
+    WHERE r.pickup_time IS NOT NULL;
+
+| dollars |
+| ------- |
+| 138     |
+
+---
+#### 2. What if there was an additional $1 charge for any pizza extras?
+
+    WITH prices AS (
+      SELECT order_id,
+      	pizza_id,
+      	CASE WHEN pizza_id = 1 THEN 12
+      		ELSE 10 END AS pizza_price,
+      	CASE WHEN extras LIKE '_' THEN 1
+      		WHEN extras LIKE '____' THEN 2
+      		WHEN extras LIKE '______' THEN 3
+      		ELSE 0 END AS extras_price
+      FROM pizza_runner.customer_orders)
+      
+    SELECT (SUM(p.pizza_price) + SUM(p.extras_price)) AS dollars
+    FROM prices AS p
+    JOIN pizza_runner.runner_orders AS r
+    	ON p.order_id = r.order_id
+    WHERE r.pickup_time IS NOT NULL;
+
+| dollars |
+| ------- |
+| 142     |
+
+---
+#### 3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
+
+    CREATE TABLE ratings AS
+    SELECT DISTINCT (c.order_id),
+    	c.customer_id,
+        r.runner_id
+    FROM pizza_runner.runner_orders AS r
+    LEFT JOIN pizza_runner.customer_orders AS c
+    	ON r.order_id = c.order_id
+    WHERE r.cancellation IS NULL;
+
+    ALTER TABLE ratings
+    ADD rating INTEGER;
+
+    UPDATE ratings
+    SET rating = 4 
+    WHERE order_id = 1;
+
+    UPDATE ratings
+    SET rating = 5 
+    WHERE order_id = 2;
+
+    UPDATE ratings
+    SET rating = 5 
+    WHERE order_id = 3;
+
+    UPDATE ratings
+    SET rating = 3 
+    WHERE order_id = 4;
+
+    UPDATE ratings
+    SET rating = 5 
+    WHERE order_id = 5;
+
+    UPDATE ratings
+    SET rating = 4
+    WHERE order_id = 7;
+
+    UPDATE ratings
+    SET rating = 5 
+    WHERE order_id = 8;
+
+    UPDATE ratings
+    SET rating = 5 
+    WHERE order_id = 10;
+
+    SELECT *
+    FROM ratings;
+
+| order_id | customer_id | runner_id | rating |
+| -------- | ----------- | --------- | ------ |
+| 1        | 101         | 1         | 4      |
+| 2        | 101         | 1         | 5      |
+| 3        | 102         | 1         | 5      |
+| 4        | 103         | 2         | 3      |
+| 5        | 104         | 3         | 5      |
+| 7        | 105         | 2         | 4      |
+| 8        | 102         | 2         | 5      |
+| 10       | 104         | 1         | 5      |
+
+---
+
 ### 🏆 E. Bonus Questions
 
 ## 🚀 Final Thoughts
