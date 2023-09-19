@@ -611,7 +611,77 @@
 | 10       | 104         | 1         | 5      |
 
 ---
+#### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
+#### - order_id
+#### - customer_id
+#### - runner_id
+#### - rating
+#### - order_time
+#### - pickup_time
+#### - time between order and pickup
+#### - delivery duration
+#### - average speed
+#### - total number of pizzas
+
+    SELECT rt.*,
+    	c.order_time,
+        r.pickup_time,
+        EXTRACT(minutes FROM (r.pickup_time - c.order_time)) AS mins_btwn_order_and_pickup,
+        r.duration_in_mins,
+        ROUND((r.distance_in_km / (r.duration_in_mins / 60)),1) AS avg_kph,
+        COUNT(c.pizza_id) AS num_pizzas
+    FROM ratings AS rt
+    JOIN pizza_runner.customer_orders AS c
+    	ON rt.order_id = c.order_id
+    JOIN pizza_runner.runner_orders AS r
+    	ON rt.order_id = r.order_id
+    WHERE r.pickup_time IS NOT NULL
+    GROUP BY rt.order_id,
+    	rt.customer_id,
+        rt.runner_id,
+        rt.rating,
+    	c.order_time,
+    	r.pickup_time,
+        mins_btwn_order_and_pickup,
+        r.duration_in_mins,
+        avg_kph
+    ORDER BY rt.order_id;
+
+| order_id | customer_id | runner_id | rating | order_time               | pickup_time              | mins_btwn_order_and_pickup | duration_in_mins | avg_kph | num_pizzas |
+| -------- | ----------- | --------- | ------ | ------------------------ | ------------------------ | -------------------------- | ---------------- | ------- | ---------- |
+| 1        | 101         | 1         | 4      | 2020-01-01T18:05:02.000Z | 2020-01-01T18:15:34.000Z | 10                         | 32               | 37.5    | 1          |
+| 2        | 101         | 1         | 5      | 2020-01-01T19:00:52.000Z | 2020-01-01T19:10:54.000Z | 10                         | 27               | 44.4    | 1          |
+| 3        | 102         | 1         | 5      | 2020-01-02T23:51:23.000Z | 2020-01-03T00:12:37.000Z | 21                         | 20               | 40.2    | 2          |
+| 4        | 103         | 2         | 3      | 2020-01-04T13:23:46.000Z | 2020-01-04T13:53:03.000Z | 29                         | 40               | 35.1    | 3          |
+| 5        | 104         | 3         | 5      | 2020-01-08T21:00:29.000Z | 2020-01-08T21:10:57.000Z | 10                         | 15               | 40.0    | 1          |
+| 7        | 105         | 2         | 4      | 2020-01-08T21:20:29.000Z | 2020-01-08T21:30:45.000Z | 10                         | 25               | 60.0    | 1          |
+| 8        | 102         | 2         | 5      | 2020-01-09T23:54:33.000Z | 2020-01-10T00:15:02.000Z | 20                         | 15               | 93.6    | 1          |
+| 10       | 104         | 1         | 5      | 2020-01-11T18:34:49.000Z | 2020-01-11T18:50:20.000Z | 15                         | 10               | 60.0    | 2          |
+
+---
+#### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+
+    WITH prices AS (
+      SELECT c.order_id,
+      	c.pizza_id,
+      	CASE WHEN c.pizza_id = 1 THEN 12
+      	ELSE 10 END AS price,
+      	ROUND((distance_in_km * 0.30), 2) AS runner_pay
+      FROM pizza_runner.customer_orders AS c
+    	JOIN pizza_runner.runner_orders AS r
+    	ON c.order_id = r.order_id)
+        
+    SELECT ROUND((SUM(price) - SUM(runner_pay)), 2) AS dollars_left
+    FROM prices
+    WHERE runner_pay IS NOT NULL;
+
+| dollars_left |
+| ------------ |
+| 73.38        |
+
+---
 
 ### 🏆 E. Bonus Questions
+#### If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 
 ## 🚀 Final Thoughts
