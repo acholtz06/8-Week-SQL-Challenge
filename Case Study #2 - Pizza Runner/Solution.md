@@ -513,36 +513,25 @@ Insights:
 
 #### 1. What are the standard ingredients for each pizza?
 
-    WITH unnested AS (
+   WITH unnested AS (
       SELECT pizza_id,
       	(UNNEST(STRING_TO_ARRAY(toppings, ',')))::INT AS topping_id
       FROM pizza_runner.pizza_recipes)
     
     SELECT n.pizza_name,
-    	t.topping_name
+    	STRING_AGG(t.topping_name, ', ') AS toppings
     FROM unnested AS u
     JOIN pizza_runner.pizza_names AS n
     	ON u.pizza_id = n.pizza_id
     JOIN pizza_runner.pizza_toppings AS t
     	ON u.topping_id = t.topping_id
+    GROUP BY n.pizza_name
     ORDER BY n.pizza_name;
 
-| pizza_name | topping_name |
-| ---------- | ------------ |
-| Meatlovers | BBQ Sauce    |
-| Meatlovers | Pepperoni    |
-| Meatlovers | Cheese       |
-| Meatlovers | Salami       |
-| Meatlovers | Chicken      |
-| Meatlovers | Bacon        |
-| Meatlovers | Mushrooms    |
-| Meatlovers | Beef         |
-| Vegetarian | Tomato Sauce |
-| Vegetarian | Cheese       |
-| Vegetarian | Mushrooms    |
-| Vegetarian | Onions       |
-| Vegetarian | Peppers      |
-| Vegetarian | Tomatoes     |
+| pizza_name | toppings                                                              |
+| ---------- | --------------------------------------------------------------------- |
+| Meatlovers | Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| Vegetarian | Cheese, Mushrooms, Onions, Peppers, Tomatoes, Tomato Sauce            |
 
 ---
 #### 2. What was the most commonly added extra?
@@ -591,6 +580,82 @@ Insights:
 | topping_name | times_excluded |
 | ------------ | -------------- |
 | Cheese       | 10             |
+
+---
+
+#### 4. Generate an order item for each record in the customers_orders table in the format of one of the following:
+#### - Meat Lovers
+#### - Meat Lovers - Exclude Beef
+#### - Meat Lovers - Extra Bacon
+#### - Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
+
+    WITH extras AS (
+    SELECT c.order_id,
+    	c.pizza_id,
+      	c.extras AS e,
+        STRING_AGG(t.topping_name, ', ') AS extras
+    FROM (
+    	SELECT *,
+    		UNNEST(STRING_TO_ARRAY(extras, ', '))::INT
+    	FROM pizza_runner.customer_orders) AS c
+    JOIN pizza_runner.pizza_toppings AS t
+    ON c.unnest = t.topping_id
+    WHERE c.extras IS NOT NULL
+    GROUP BY c.order_id, c.pizza_id, c.extras
+    ORDER BY c.order_id)
+    
+    , exclusions AS (
+    SELECT 
+    	c.order_id,
+    	c.pizza_id,
+      	c.exclusions AS e,
+    	COUNT(c.pizza_id) num_pizzas,
+        STRING_AGG(t.topping_name, ', ') AS exclusions
+    FROM (
+    	SELECT ROW_NUMBER() OVER() AS row_num,
+      		*,
+    		UNNEST(STRING_TO_ARRAY(exclusions, ', '))::INT
+    	FROM pizza_runner.customer_orders) AS c
+    JOIN pizza_runner.pizza_toppings AS t
+    ON c.unnest = t.topping_id
+    WHERE c.exclusions IS NOT NULL
+    GROUP BY
+    	c.order_id,
+    	c.pizza_id,
+      	c.exclusions,
+      c.row_num
+    ORDER BY c.order_id)
+    
+    SELECT c.order_id,
+    	CONCAT(n.pizza_name,
+       		COALESCE(' - Extra ' || xt.extras, ''), 
+        	COALESCE(' - Exclude ' || ex.exclusions, '')) AS pizza_order
+    FROM pizza_runner.customer_orders AS c
+    LEFT JOIN extras AS xt
+    ON c.order_id = xt.order_id AND c.pizza_id = xt.pizza_id AND c.extras = xt.e
+    LEFT JOIN exclusions AS ex
+    ON c.order_id = ex.order_id AND c.pizza_id = ex.pizza_id AND c.exclusions = ex.e
+    JOIN pizza_runner.pizza_names AS n
+    ON c.pizza_id = n.pizza_id;
+
+| order_id | pizza_order                                                     |
+| -------- | --------------------------------------------------------------- |
+| 1        | Meatlovers                                                      |
+| 2        | Meatlovers                                                      |
+| 3        | Meatlovers                                                      |
+| 3        | Vegetarian                                                      |
+| 4        | Meatlovers - Exclude Cheese                                     |
+| 4        | Meatlovers - Exclude Cheese                                     |
+| 4        | Meatlovers - Exclude Cheese                                     |
+| 4        | Meatlovers - Exclude Cheese                                     |
+| 4        | Vegetarian - Exclude Cheese                                     |
+| 5        | Meatlovers - Extra Bacon                                        |
+| 6        | Vegetarian                                                      |
+| 7        | Vegetarian - Extra Bacon                                        |
+| 8        | Meatlovers                                                      |
+| 9        | Meatlovers - Extra Bacon, Chicken - Exclude Cheese              |
+| 10       | Meatlovers - Extra Bacon, Cheese - Exclude BBQ Sauce, Mushrooms |
+| 10       | Meatlovers                                                      |
 
 ---
 
