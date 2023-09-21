@@ -513,18 +513,18 @@ Insights:
 
 #### 1. What are the standard ingredients for each pizza?
 
-   WITH unnested AS (
-      SELECT pizza_id,
-      	(UNNEST(STRING_TO_ARRAY(toppings, ',')))::INT AS topping_id
-      FROM pizza_runner.pizza_recipes)
-    
+    WITH unnested AS (
+          SELECT pizza_id,
+          	(UNNEST(STRING_TO_ARRAY(toppings, ',')))::INT AS topping_id
+          FROM pizza_runner.pizza_recipes)
+        
     SELECT n.pizza_name,
-    	STRING_AGG(t.topping_name, ', ') AS toppings
+        STRING_AGG(t.topping_name, ', ') AS toppings
     FROM unnested AS u
     JOIN pizza_runner.pizza_names AS n
-    	ON u.pizza_id = n.pizza_id
+        ON u.pizza_id = n.pizza_id
     JOIN pizza_runner.pizza_toppings AS t
-    	ON u.topping_id = t.topping_id
+        ON u.topping_id = t.topping_id
     GROUP BY n.pizza_name
     ORDER BY n.pizza_name;
 
@@ -532,6 +532,7 @@ Insights:
 | ---------- | --------------------------------------------------------------------- |
 | Meatlovers | Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
 | Vegetarian | Cheese, Mushrooms, Onions, Peppers, Tomatoes, Tomato Sauce            |
+
 
 ---
 #### 2. What was the most commonly added extra?
