@@ -819,6 +819,103 @@ Insights:
 | 10       | Meatlovers: 2xBacon, Beef, 2xCheese, Chicken, Pepperoni, Salami                     |
 
 ---
+#### 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+
+    WITH numbered AS (
+      SELECT ROW_NUMBER() OVER(
+      	ORDER BY c.order_id) AS num_pizza,
+      	c.*
+      FROM pizza_runner.customer_orders AS c
+      JOIN pizza_runner.runner_orders AS r
+    	ON c.order_id = r.order_id
+      WHERE r.pickup_time IS NOT NULL)
+    
+    , unnested AS (
+    	SELECT num_pizza,
+    		order_id,
+        	pizza_id,
+      		exclusions,
+      		extras,
+        	UNNEST(STRING_TO_ARRAY(exclusions, ','))::INT AS exclude,
+        	UNNEST(STRING_TO_ARRAY(extras, ','))::INT AS add
+    	FROM numbered)
+        
+    , exclusions AS (
+      SELECT t.topping_name AS ingredient,
+      	COUNT(t.topping_name) AS times_excluded
+      FROM unnested AS u
+      JOIN pizza_runner.pizza_toppings AS t
+      ON u.exclude = t.topping_id
+      GROUP BY ingredient
+      ORDER BY times_excluded DESC)
+      
+    , extras AS (
+      SELECT t.topping_name AS ingredient,
+      	COUNT(t.topping_name) AS times_used
+      FROM unnested AS u
+      JOIN pizza_runner.pizza_toppings AS t
+      ON u.add = t.topping_id
+      GROUP BY ingredient
+      ORDER BY times_used DESC)
+      
+    , recipes AS (
+      SELECT r.pizza_id,
+      	n.pizza_name,
+      	UNNEST(STRING_TO_ARRAY(r.toppings, ',')):: INT AS toppings
+      FROM pizza_runner.pizza_recipes AS r
+      JOIN pizza_runner.pizza_names AS n
+      ON r.pizza_id = n.pizza_id)
+    
+    , counts AS (
+    	SELECT t.topping_name,
+    		COUNT(t.topping_name) AS topping_count
+    	FROM numbered AS n
+    	JOIN recipes AS r
+    	ON n.pizza_id = r.pizza_id
+    	JOIN pizza_runner.pizza_toppings AS t
+    	ON r.toppings = t.topping_id
+    	GROUP BY t.topping_name
+    	ORDER BY topping_count DESC)
+      
+    
+    , cleaned AS (
+    	SELECT c.topping_name AS ingredient,
+    		CASE WHEN c.topping_count IS NULL
+        		THEN 0
+            	ELSE c.topping_count END AS topping_count,
+        	CASE WHEN ex.times_excluded IS NULL
+        		THEN 0
+            	ELSE ex.times_excluded END AS times_excluded,
+        	CASE WHEN xt.times_used IS NULL
+        		THEN 0
+            	ELSE xt.times_used END AS times_added
+    	FROM counts AS c
+    	LEFT JOIN exclusions AS ex
+    	ON c.topping_name = ex.ingredient
+    	LEFT JOIN extras as xt
+    	ON c.topping_name = xt.ingredient)
+    
+    SELECT ingredient,
+      (topping_count - times_excluded + times_added) AS times_used
+    FROM cleaned
+    ORDER BY times_used DESC;
+
+| ingredient   | times_used |
+| ------------ | ---------- |
+| Bacon        | 12         |
+| Mushrooms    | 11         |
+| Cheese       | 10         |
+| Pepperoni    | 9          |
+| Salami       | 9          |
+| Chicken      | 9          |
+| Beef         | 9          |
+| BBQ Sauce    | 8          |
+| Tomatoes     | 3          |
+| Onions       | 3          |
+| Peppers      | 3          |
+| Tomato Sauce | 3          |
+
+---
 
 ### 💰 D. Pricing and Ratings
 
