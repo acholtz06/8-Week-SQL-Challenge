@@ -659,6 +659,158 @@ Insights:
 
 ---
 
+#### 5. Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
+#### - For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
+
+    WITH numbered AS (
+      SELECT ROW_NUMBER() OVER(
+      	ORDER BY order_id) AS num_pizza,
+      	*
+      FROM pizza_runner.customer_orders)
+    
+    , unnested AS (
+    	SELECT num_pizza,
+    		order_id,
+        	pizza_id,
+      		exclusions,
+      		extras,
+        	UNNEST(STRING_TO_ARRAY(exclusions, ','))::INT AS exclude,
+        	UNNEST(STRING_TO_ARRAY(extras, ','))::INT AS add
+    	FROM numbered)
+        
+      
+    , exclusions AS (
+      SELECT u.num_pizza,
+      	u.order_id,
+      	n.pizza_id,
+      	STRING_AGG(t.topping_name, ', ') AS exclusions
+      FROM unnested AS u
+      JOIN pizza_runner.pizza_names AS n
+      ON u.pizza_id = n.pizza_id
+      JOIN pizza_runner.pizza_toppings AS t
+      ON u.exclude = t.topping_id
+      GROUP BY u.num_pizza,
+      	u.order_id,
+      	n.pizza_id
+      ORDER BY u.order_id)
+    
+    , extras AS (
+      SELECT u.num_pizza,
+      	u.order_id,
+      	n.pizza_id,
+      	STRING_AGG(t.topping_name, ', ') AS extras
+      FROM unnested AS u
+     JOIN pizza_runner.pizza_names AS n
+      ON u.pizza_id = n.pizza_id
+      JOIN pizza_runner.pizza_toppings AS t
+      ON u.add = t.topping_id
+      GROUP BY u.num_pizza,
+      	u.order_id,
+      	n.pizza_id
+      ORDER BY u.order_id)
+      
+    , all_orders AS (
+      SELECT n.num_pizza,
+      	n.order_id,
+      	n.pizza_id,
+      	ex.exclusions,
+      	xt.extras
+      FROM numbered AS n
+      LEFT JOIN exclusions AS ex
+      ON n.num_pizza = ex.num_pizza AND n.order_id = ex.order_id AND n.pizza_id = ex.pizza_id
+      LEFT JOIN extras AS xt
+      ON n.num_pizza = xt.num_pizza AND n.order_id = xt.order_id AND n.pizza_id = xt.pizza_id)
+      
+    , recipes AS (
+      SELECT r.pizza_id,
+      	n.pizza_name,
+      	UNNEST(STRING_TO_ARRAY(r.toppings, ',')):: INT AS toppings
+      FROM pizza_runner.pizza_recipes AS r
+      JOIN pizza_runner.pizza_names AS n
+      ON r.pizza_id = n.pizza_id)
+      
+     , all_ingredients AS (
+       SELECT o.num_pizza,
+       	o.order_id,
+       	o.pizza_id,
+       	r.pizza_name,
+       	o.exclusions,
+       	o.extras,
+       	r.toppings
+       FROM all_orders AS o
+       JOIN recipes AS r
+       ON o.pizza_id = r.pizza_id
+       ORDER BY o.num_pizza)
+       
+    , names AS (
+      SELECT a.num_pizza,
+      	a.order_id,
+      	a.pizza_name,
+      	a.exclusions,
+      	a.extras,
+      	t.topping_name
+      FROM all_ingredients AS a
+      JOIN pizza_runner.pizza_toppings AS t
+      ON a.toppings = t.topping_id
+      ORDER BY a.num_pizza,
+      		a.order_id,
+    		t.topping_name)
+    
+    , exclusions_and_extras AS (
+      SELECT num_pizza,
+      	order_id,
+      	pizza_name,
+      	exclusions,
+      	extras,
+      	topping_name,
+      	CASE WHEN exclusions LIKE ('%' || topping_name || '%')
+      		THEN NULL
+      		WHEN exclusions IS NULL
+      		THEN 'X'
+      		ELSE 'X' END AS exclude,
+      	CASE WHEN extras LIKE ('%' || topping_name || '%')
+      		THEN ('2x' || topping_name)
+      		WHEN extras IS NULL
+      		THEN topping_name
+      		ELSE topping_name END AS add
+      FROM names)
+    
+    
+    , ingredients AS (
+      SELECT *,
+      	CASE WHEN exclude IS NULL
+      		THEN NULL
+      		ELSE add END AS ingredients
+      FROM exclusions_and_extras)
+    
+    SELECT order_id,
+    	CONCAT(pizza_name, ': ',
+        STRING_AGG(ingredients, ', ')) AS pizza_recipe
+    FROM ingredients
+    GROUP BY num_pizza,
+    	order_id,
+    	pizza_name
+    ORDER BY num_pizza;
+
+| order_id | pizza_recipe                                                                        |
+| -------- | ----------------------------------------------------------------------------------- |
+| 1        | Meatlovers: BBQ Sauce, Bacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami   |
+| 2        | Meatlovers: BBQ Sauce, Bacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami   |
+| 3        | Vegetarian: Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes              |
+| 3        | Meatlovers: BBQ Sauce, Bacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami   |
+| 4        | Vegetarian: Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes                      |
+| 4        | Meatlovers: BBQ Sauce, Bacon, Beef, Chicken, Mushrooms, Pepperoni, Salami           |
+| 4        | Meatlovers: BBQ Sauce, Bacon, Beef, Chicken, Mushrooms, Pepperoni, Salami           |
+| 5        | Meatlovers: BBQ Sauce, 2xBacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 6        | Vegetarian: Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes              |
+| 7        | Vegetarian: Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes              |
+| 8        | Meatlovers: BBQ Sauce, Bacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami   |
+| 9        | Meatlovers: BBQ Sauce, 2xBacon, Beef, 2xChicken, Mushrooms, Pepperoni, Salami       |
+| 10       | Meatlovers: BBQ Sauce, Bacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami   |
+| 10       | Meatlovers: 2xBacon, Beef, 2xCheese, Chicken, Pepperoni, Salami                     |
+
+---
+
 ### 💰 D. Pricing and Ratings
 
 #### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
