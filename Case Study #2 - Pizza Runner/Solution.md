@@ -590,52 +590,61 @@ Insights:
 #### - Meat Lovers - Extra Bacon
 #### - Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
 
-    WITH extras AS (
-    SELECT c.order_id,
+    WITH row_number AS (
+      SELECT ROW_NUMBER() OVER(
+        ORDER BY order_id) AS num_pizza,
+      *
+      FROM pizza_runner.customer_orders)
+    
+    
+    , extras AS (
+    SELECT c.num_pizza,
+      	c.order_id,
     	c.pizza_id,
       	c.extras AS e,
         STRING_AGG(t.topping_name, ', ') AS extras
     FROM (
     	SELECT *,
     		UNNEST(STRING_TO_ARRAY(extras, ', '))::INT
-    	FROM pizza_runner.customer_orders) AS c
+    	FROM row_number) AS c
     JOIN pizza_runner.pizza_toppings AS t
     ON c.unnest = t.topping_id
     WHERE c.extras IS NOT NULL
-    GROUP BY c.order_id, c.pizza_id, c.extras
+    GROUP BY c.num_pizza,
+      	c.order_id, 
+    	c.pizza_id, 
+      	c.extras
     ORDER BY c.order_id)
     
     , exclusions AS (
-    SELECT 
+    SELECT c.num_pizza,
     	c.order_id,
     	c.pizza_id,
       	c.exclusions AS e,
     	COUNT(c.pizza_id) num_pizzas,
         STRING_AGG(t.topping_name, ', ') AS exclusions
     FROM (
-    	SELECT ROW_NUMBER() OVER() AS row_num,
-      		*,
+      	SELECT *,
     		UNNEST(STRING_TO_ARRAY(exclusions, ', '))::INT
-    	FROM pizza_runner.customer_orders) AS c
+    	FROM row_number) AS c
     JOIN pizza_runner.pizza_toppings AS t
     ON c.unnest = t.topping_id
     WHERE c.exclusions IS NOT NULL
-    GROUP BY
+    GROUP BY c.num_pizza,
     	c.order_id,
     	c.pizza_id,
-      	c.exclusions,
-      c.row_num
+      	c.exclusions
     ORDER BY c.order_id)
     
     SELECT c.order_id,
     	CONCAT(n.pizza_name,
        		COALESCE(' - Extra ' || xt.extras, ''), 
         	COALESCE(' - Exclude ' || ex.exclusions, '')) AS pizza_order
-    FROM pizza_runner.customer_orders AS c
+    FROM row_number AS c
     LEFT JOIN extras AS xt
-    ON c.order_id = xt.order_id AND c.pizza_id = xt.pizza_id AND c.extras = xt.e
+    ON c.num_pizza = xt.num_pizza AND c.order_id = xt.order_id AND c.pizza_id = xt.pizza_id AND c.extras = xt.e
     LEFT JOIN exclusions AS ex
-    ON c.order_id = ex.order_id AND c.pizza_id = ex.pizza_id AND c.exclusions = ex.e
+    ON c.num_pizza = ex.num_pizza AND c.order_id = ex.order_id AND c.pizza_id = ex.pizza_id AND c.exclusions = ex.e
     JOIN pizza_runner.pizza_names AS n
     ON c.pizza_id = n.pizza_id;
 
@@ -643,20 +652,19 @@ Insights:
 | -------- | --------------------------------------------------------------- |
 | 1        | Meatlovers                                                      |
 | 2        | Meatlovers                                                      |
-| 3        | Meatlovers                                                      |
 | 3        | Vegetarian                                                      |
-| 4        | Meatlovers - Exclude Cheese                                     |
-| 4        | Meatlovers - Exclude Cheese                                     |
-| 4        | Meatlovers - Exclude Cheese                                     |
-| 4        | Meatlovers - Exclude Cheese                                     |
+| 3        | Meatlovers                                                      |
 | 4        | Vegetarian - Exclude Cheese                                     |
+| 4        | Meatlovers - Exclude Cheese                                     |
+| 4        | Meatlovers - Exclude Cheese                                     |
 | 5        | Meatlovers - Extra Bacon                                        |
 | 6        | Vegetarian                                                      |
 | 7        | Vegetarian - Extra Bacon                                        |
 | 8        | Meatlovers                                                      |
 | 9        | Meatlovers - Extra Bacon, Chicken - Exclude Cheese              |
-| 10       | Meatlovers - Extra Bacon, Cheese - Exclude BBQ Sauce, Mushrooms |
 | 10       | Meatlovers                                                      |
+| 10       | Meatlovers - Extra Bacon, Cheese - Exclude BBQ Sauce, Mushrooms |
+
 
 ---
 
