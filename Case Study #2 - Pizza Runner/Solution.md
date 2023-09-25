@@ -954,6 +954,55 @@ Insights:
 | 10       | Meatlovers: BBQ Sauce, Bacon, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami   |
 | 10       | Meatlovers: 2xBacon, Beef, 2xCheese, Chicken, Pepperoni, Salami                     |
 
+Steps:
+CTE #1:
+- Used the same code as the previous question to number the rows
+
+CTE #2:
+- Instead of using subqueries, this time I used a CTE to separate and unnest the extras and exlusions into their own rows
+- Changed the data types to INT
+
+CTE #3:
+- Used the same code from the previous problem, except I joined the CTE instead of the subquery
+
+CTE #4:
+- Used the same code from the previous problem, except I joined the CTE instead of the subquery
+
+CTE #5:
+- This was to bring together all pizzas ordered with their exlusions and extras
+- Used the first CTE and left joined the exclusions table on all appropriate columns
+- Left joined the extras table on all appropriate columns
+
+CTE #6:
+- Used the code from question #1 to separate and unnest all of the toppings
+
+CTE #7:
+- Used the code from question #1 to get all of the topping names
+- Did not used STRING_AGG like in question #1 because I wanted to keep them all separated for now
+
+CTE #8:
+- Joined the previous CTE to the pizza toppings table to get all of the topping names
+- Included the topping name in the ORDER BY statement so that they were ordered alphabetically
+- Ended up with a list of every pizza ordered, all toppings included with the pizza, and any exclusions or extras
+
+CTE #9:
+- Used the previous CTE
+- Created a CASE statement. For exclusions, if the text in the exlusions column matched any part of the toppings column, then it would be left null. Otherwise, there would be 'X'
+- For extras, if the text in the extras column matched any part of the toppings column, then it would concatenate '2x' with the topping name. Otherwise, it would just show the topping name
+
+CTE #10:
+- Used the previous CTE
+- Created a CASE statement that combined the two previous CASE statements
+- If exlusions was null, then it would be null
+- Otherwise, it would show what as in the extras column
+
+Final Query:
+- Used STRING_AGG to put all ingredients into one row separated by the ', ' delimiter
+- Used CONCAT to add the pizza name and ': ' before the list of ingredients
+- Made sure to group by the row number, order id, and pizza id to make sure that there was one row for each pizza ordered
+
+Insights:
+- This is a table created to show a readable recipe of ingredients for each pizza ordered
 ---
 #### 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 
