@@ -170,5 +170,153 @@
 | ------------- |
 | 30.7          |
 
----
 
+---
+#### 5. How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
+
+    WITH plans AS (
+    	SELECT *
+    	FROM foodie_fi.subscriptions
+    	WHERE plan_id NOT IN (1, 2, 3)
+    	ORDER by customer_id,
+    		plan_id)
+    
+    , counts AS (
+      SELECT customer_id,
+      	COUNT(plan_id) AS num_plans
+      FROM plans
+      GROUP BY customer_id
+      HAVING COUNT(plan_id) = 2
+      ORDER BY customer_id)
+      
+    , dates AS (
+      SELECT p.customer_id,
+      	p.plan_id,
+      	p.start_date
+      FROM plans AS p
+      JOIN counts AS c
+      ON p.customer_id = c.customer_id)
+      
+    , lagged AS (
+      SELECT customer_id,
+      	plan_id,
+      	start_date,
+      	LAG(start_date + 7, 1) OVER(
+          PARTITION BY customer_id
+          ORDER BY plan_id) AS churn_date
+      FROM dates)
+    
+    , num_churned AS (
+      SELECT COUNT(customer_id) AS churned_after_trial
+      FROM lagged
+      WHERE start_date = churn_date)
+    
+    
+    SELECT churned_after_trial,
+    	ROUND((churned_after_trial::numeric / 1000) * 100, 0) AS percent_churn_after_trial
+    FROM num_churned;
+
+| churned_after_trial | percent_churn_after_trial |
+| ------------------- | ------------------------- |
+| 92                  | 9                         |
+
+---
+#### 6. What is the number and percentage of customer plans after their initial free trial?
+
+    WITH ranks AS (
+      SELECT *,
+      	RANK() OVER(
+          PARTITION BY customer_id
+          ORDER BY start_date) AS plan_rank
+      FROM foodie_fi.subscriptions)
+    
+    SELECT p.plan_name,
+    	COUNT(r.plan_id) AS num_in_plan,
+        ROUND((COUNT(r.plan_id)::numeric / (
+        	SELECT COUNT(DISTINCT customer_id)
+        	FROM ranks)) * 100, 0) AS percent_in_plan
+    FROM ranks AS r
+    JOIN foodie_fi.plans AS p
+    ON r.plan_id = p.plan_id
+    WHERE r.plan_rank = 2
+    GROUP BY p.plan_name,
+    	r.plan_id
+    ORDER BY r.plan_id;
+
+| plan_name     | num_in_plan | percent_in_plan |
+| ------------- | ----------- | --------------- |
+| basic monthly | 546         | 55              |
+| pro monthly   | 325         | 33              |
+| pro annual    | 37          | 4               |
+| churn         | 92          | 9               |
+
+---
+#### 7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+
+    WITH date AS (
+      SELECT customer_id,
+      	MAX(start_date) AS current_plan
+      FROM foodie_fi.subscriptions
+      WHERE start_date <= '2020-12-31'
+      GROUP BY customer_id
+      ORDER BY customer_id)
+    
+    SELECT p.plan_name,
+    	COUNT(s.plan_id) AS num_in_plan,
+        ROUND((COUNT(s.plan_id)::numeric / (
+          SELECT COUNT(DISTINCT customer_id)
+          FROM date)) * 100, 0) AS percent_in_plan
+    FROM date AS d
+    JOIN foodie_fi.subscriptions AS s
+    ON d.customer_id = s.customer_id AND d.current_plan = s.start_date
+    JOIN foodie_fi.plans AS p
+    ON s.plan_id = p.plan_id
+    GROUP BY p.plan_name,
+    	s.plan_id
+    ORDER BY s.plan_id;
+
+| plan_name     | num_in_plan | percent_in_plan |
+| ------------- | ----------- | --------------- |
+| trial         | 19          | 2               |
+| basic monthly | 224         | 22              |
+| pro monthly   | 326         | 33              |
+| pro annual    | 195         | 20              |
+| churn         | 236         | 24              |
+
+---
+#### 8. How many customers have upgraded to an annual plan in 2020?
+
+    SELECT COUNT(DISTINCT customer_id) AS num_upgraded
+    FROM foodie_fi.subscriptions
+    WHERE plan_id = 3 AND start_date IN (
+      SELECT start_date
+      FROM foodie_fi.subscriptions
+      WHERE start_date BETWEEN '2020-01-01' AND '2020-12-31');
+
+| num_upgraded |
+| ------------ |
+| 195          |
+
+---
+#### 9. How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+
+    WITH join_date AS (
+      SELECT *
+      FROM foodie_fi.subscriptions
+      WHERE plan_id = 0)
+    
+    , annual AS (
+      SELECT *
+      FROM foodie_fi.subscriptions
+      WHERE plan_id = 3)
+    
+    SELECT ROUND(AVG(a.start_date - j.start_date), 0) AS avg_days_to_upgrade
+    FROM join_date AS j
+    JOIN annual AS a
+    ON j.customer_id = a.customer_id;
+
+| avg_days_to_upgrade |
+| ------------------- |
+| 105                 |
+
+---
