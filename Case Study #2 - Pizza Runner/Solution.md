@@ -319,6 +319,14 @@ Insights:
 | 21   | 3          |
 | 23   | 3          |
 
+Steps:
+- Extracted the hour from the order time
+- Counted the orders
+- Grouped by hour
+
+Insights:
+- 2:00 PM, 6:00 PM, 9:00 PM, and 11:00 PM are the hours with the highest volume with 3 orders each
+- All other hours had 0-1 orders each
 ---
 #### 10. What was the volume of orders for each day of the week?
 
@@ -393,6 +401,16 @@ Insights:
 | 2    | 1                  |
 | 3    | 1                  |
 
+Steps:
+- When I extrcted the week from the registration_date, I noticed that I got two weeks that said 53, which didn't make sense because I knew all of the orders that were tracked were at the beginning of the year
+- Looking at the calendar, 2021-01-01 was on a Friday, so it looks like SQL included those early January dates with the last days of December for a week 53
+- To fix this, I extracted the week from the registration date and added 3 days so that 2021-01-01 started at the beginning of week 1
+- Counted the runner ids
+- Grouped by week
+
+Insights:
+- Two runners registered in the first week
+- One runner registered each week after the first week
 ---
 #### 2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
 
@@ -410,6 +428,16 @@ Insights:
 | 2         | 23                  |
 | 3         | 10                  |
 
+❗ There is no actual arrival time listed for the runners so we can't know if the pizzas were finished and waiting to be picked up when the runner arrived, or if the runners arrived before the pizzas were finished
+
+Steps:
+- Joined the customer orders and the runner orders tables so that I could have the runner ids, pickup times, and order times
+- Took the average of the pickup time minus the order time and then extracted the minutes from that time
+- Grouped by the runner id
+
+Insights:
+- Runner 3 averaged the fastest times, while runner 2 averaged the slowest times
+- This doesn't show the whole picture because we don't know how long the pizzas took to prepare or what time the runner showed up. It is possible that runner 2 happened to get orders that took longer to prepare
 ---
 #### 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
 
@@ -434,6 +462,18 @@ Insights:
 | 2          | 18               |
 | 3          | 29               |
 
+❗ We have the pickup time, but we can't know for sure if that is how long the pizzas took to prepare or if the runner showed up after the pizzas were finished
+
+Steps:
+- Creted a CTE where I counted the pizza ids to find the number of pizzas
+- Grouped by the order id and order time to show how many pizzas were in each order
+- Joined the CTE to the runner orders table to get the pickup time
+- I extracted the minutes from the pickup time minus the order time and found the average to find the average amount of time it took to prepare the pizzas
+- Grouped by the number of pizzas in the order
+
+Insights:
+- It is clear that the more pizzas there are in an order, the longer the order will take to prepare
+- There is a larger jump in time when going from 2 to 3 pizzas than there is when going from 1 to 2 pizzas
 ---
 #### 4. What was the average distance travelled for each customer?
 
@@ -453,6 +493,14 @@ Insights:
 | 104         | 10.0               |
 | 105         | 25.0               |
 
+Steps:
+- Joined the customer orders and the runner orders tables to get the customer ids and the distnace travelled
+- Found the average of the distance in km and rounded that number to 1 decimal place
+- Grouped by customer id
+
+Insights:
+- Runners are travelling anywhere between 10 to 25 km depending on the customer
+
 ---
 #### 5. What was the difference between the longest and shortest delivery times for all orders?
 
@@ -462,6 +510,12 @@ Insights:
 | difference_in_mins |
 | ------------------ |
 | 30                 |
+
+Steps:
+- Took the max(or longest) duration of delivery and subtrated the min(or shortest) duration of delivery
+
+Insights:
+- There is a 30 minute difference between the shortest and longest delivery times
 
 ---
 #### 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
@@ -485,6 +539,15 @@ Insights:
 | 2         | 8        | 23.4           | 93.6    |
 | 3         | 5        | 10             | 40.0    |
 
+Steps:
+- Took the distnace in km divided that by the duration in mins/60 (to get the number in hours)
+- Rounded that number to 1 decimal place
+- Filtered for orders that were successfully delivered
+
+Insights:
+- Most speeds look to be staying between 35-60 kph
+- Runner 2 has a large vaiance in speeds, with one order averaging 93.6 kph
+
 ---
 #### 7. What is the successful delivery percentage for each runner?
 
@@ -507,9 +570,24 @@ Insights:
 | 2         | 75              |
 | 3         | 50              |
 
+Steps:
+- Created a CTE called counts
+- Counted the number of orders
+- Counted the pickup times to find the number of successful orders
+- Grouped by the runner id
+- Used the CTE to take the successes divided by the number of orders and the multiplied by 100 to find the percentage
+- I set the success and orders to numeric data type because when using INT, anything between 0 and 1 came back as 0
+- Truncated the percentage to the whole number
+
+Insights:
+- Only runner 1 had a 100% success rate
+- Reasons for lower success rates should be investigated
+
 ---
 
 ### 🧄 C. Ingredient Optimisation
+
+📢 This section has a lot of steps so stick with me! It took some trial and error, but I enjoyed figuring it out and loved seeing the results come out how I wanted.
 
 #### 1. What are the standard ingredients for each pizza?
 
@@ -533,6 +611,18 @@ Insights:
 | Meatlovers | Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
 | Vegetarian | Cheese, Mushrooms, Onions, Peppers, Tomatoes, Tomato Sauce            |
 
+Steps:
+- Created a CTE to fix the toppings column of the pizza recipes table
+- Used STRING_TO_ARRAY to separate all of the topping ids by the ',' delimiter
+- Unnested the toppings so that each topping moved to its own row
+- Changed the topping ids from VARCHAR type to INT data type so that I would be able to join them with the topping ids from the pizza toppings table
+- Joined the CTE to the pizza names table to get the names of the pizzas
+- Joined the CTE to the pizza toppings table to get the topping names
+- Took the topping names and used STRING_AGG to combine them into one row using the ', ' delimiter
+- Grouped by the pizza name
+
+Insights:
+- This table just lists the two pizzas and what toppings come standard on each of them
 
 ---
 #### 2. What was the most commonly added extra?
@@ -558,8 +648,24 @@ Insights:
 | ------------ | ----------- |
 | Bacon        | 5           |
 
+Steps:
+- Created a CTE to fix the extras column
+- Used STRING_TO_ARRAY to separate the extras by the ',' delimiter
+- Unnested the extras so that each topping was moved to its own row
+- Changed the data type to INT so I would be able to join it with the pizza toppings table
+- Took the customer orders table and left joined the CTE so that I kept all orders
+- Joined the pizza toppings table to the CTE to get the topping names
+- Counted the topping names
+- Grouped by the topping name
+- Ordered by the times the topping was added in descending order so that the highest number was at the top
+- Limited the results to 1 to show just the most commonly added extra
+
+Insights:
+- Bacon is the most commonly added extra
+- It was added 5 times
+
 ---
-#### 3. What was the most common exclusion?
+#### 3. What was the most common exclusion?  - FIX THIS!!!!
 
     WITH unnested AS (
       SELECT order_id,
@@ -581,6 +687,13 @@ Insights:
 | topping_name | times_excluded |
 | ------------ | -------------- |
 | Cheese       | 10             |
+
+Steps:
+- I used the same code as the question above, except I changed extras to exclusions
+
+Insights:
+- Cheese was the most commonly exluded topping
+- It was not exluded 10 times... I need to go back and number my rows so I don't end up with duplicates
 
 ---
 
@@ -621,7 +734,6 @@ Insights:
     	c.order_id,
     	c.pizza_id,
       	c.exclusions AS e,
-    	COUNT(c.pizza_id) num_pizzas,
         STRING_AGG(t.topping_name, ', ') AS exclusions
     FROM (
       	SELECT *,
@@ -665,7 +777,30 @@ Insights:
 | 10       | Meatlovers                                                      |
 | 10       | Meatlovers - Extra Bacon, Cheese - Exclude BBQ Sauce, Mushrooms |
 
+Steps:
+CTE #1:
+- Numbered the rows and ordered by the order number so that each pizza ordered had a number and avoid future duplicates
 
+CTE #2:
+- Created a subquery in the FROM clause where I used STRING_TO_ARRAY and unnested so that the extras were separated. I also changed the data type to INT in this subquery
+- Joined the subquery to the pizza toppings table to get the topping names
+- Made sure to carry the row numbers through
+- Used STRING_AGG to create the list of extras for each pizza
+- Grouped by all non aggregated columns selected
+
+CTE #3:
+- Used the same code as the previous CTE, just changed extras to exlusions
+
+Final Query:
+- Used the first CTE where the rows were numbered and left joined the extras CTE on all appropriate columns
+- Left joined the exlusions CTE on all appropriate columns
+- Joined the pizza names table
+- Concatenated ' - Extra ' before the listed extras and ' - Exclude ' before the listed exclusions
+- Used COALESCE so that the text only appeared before the non null values
+- Used CONCAT to put that together with the pizza names
+
+Insights:
+- This is a table that is created for the restaurant to more easily read the orders
 ---
 
 #### 5. Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
@@ -676,6 +811,7 @@ Insights:
       	ORDER BY order_id) AS num_pizza,
       	*
       FROM pizza_runner.customer_orders)
+
     
     , unnested AS (
     	SELECT num_pizza,
