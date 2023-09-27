@@ -320,3 +320,71 @@
 | 105                 |
 
 ---
+
+#### 10. Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
+
+    WITH join_date AS (
+      SELECT *
+      FROM foodie_fi.subscriptions
+      WHERE plan_id = 0)
+    
+    , annual AS (
+      SELECT *
+      FROM foodie_fi.subscriptions
+      WHERE plan_id = 3)
+    
+    
+    , bucket AS (
+    SELECT WIDTH_BUCKET((a.start_date - j.start_date), 1, 360, 12) AS buckets,
+    	ROUND(AVG(a.start_date - j.start_date), 0) AS days
+    FROM join_date as j
+    JOIN annual AS a
+    ON j.customer_id = a.customer_id
+    GROUP BY buckets
+    ORDER BY buckets)
+    
+    SELECT CONCAT((buckets - 1) * 30 + 1, ' - ', buckets * 30) AS range_of_days,
+    	days AS avg_time_to_upgrade
+    FROM bucket;
+
+| range_of_days | avg_time_to_upgrade |
+| ------------- | ------------------- |
+| 1 - 30        | 10                  |
+| 31 - 60       | 42                  |
+| 61 - 90       | 71                  |
+| 91 - 120      | 101                 |
+| 121 - 150     | 133                 |
+| 151 - 180     | 162                 |
+| 181 - 210     | 191                 |
+| 211 - 240     | 224                 |
+| 241 - 270     | 257                 |
+| 271 - 300     | 285                 |
+| 301 - 330     | 327                 |
+| 331 - 360     | 346                 |
+
+---
+
+#### 11. How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
+
+    WITH pro_monthly AS (
+      SELECT *
+      FROM foodie_fi.subscriptions
+      WHERE plan_id = 2 AND EXTRACT(year FROM start_date) = '2020')
+    
+    , basic_monthly AS (
+      SELECT *
+      FROM foodie_fi.subscriptions
+      WHERE plan_id = 1 AND EXTRACT(year FROM start_date) = '2020')
+      
+    SELECT COUNT(p.customer_id) AS num_downgraded
+    FROM pro_monthly AS p
+    JOIN basic_monthly AS b
+    ON p.customer_id = b.customer_id
+    WHERE b.start_date > p.start_date;
+
+| num_downgraded |
+| -------------- |
+| 0              |
+
+---
+
