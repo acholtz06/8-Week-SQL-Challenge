@@ -1,6 +1,25 @@
+# 🥑 Case Study #3 - Foodie-Fi
 
----
+![Foodie-FI](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/7fb14a2f-eb1f-4903-809e-b3fd7431f31e)
+###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-3/)
 
+## ✏️ Business Task
+
+## ⚠️ Data Limitations
+
+## 🔪 Data
+
+![Foodie-Fi Data](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/dad8a118-fb61-4b26-9296-b4ea353e96aa)
+
+
+## 🥘 Case Study Questions
+
+### A. 👩‍🍳 Customer Journey
+Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
+
+Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
+
+### B. 📺 Data Analysis Questions
 #### 1. How many customers has Foodie-Fi ever had?
 
     SELECT COUNT(DISTINCT customer_id) AS total_customers
@@ -388,6 +407,8 @@
 
 ---
 
+### 💵 C. Challenge Payment Question
+
 The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
 
 - monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
@@ -487,6 +508,8 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
 | 8           | 2       | pro monthly   | 2020-12-03T00:00:00.000Z | 19.90  | 7             |
 
 ---
+
+### 🔥 D. Outside the Box Questions
 #### 1. How would you calculate the rate of growth for Foodie-Fi?
 
     WITH lead AS (
@@ -600,4 +623,6 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
 | 937                           |
 
 ---
+
+## 🚀 Final Thoughts
 
