@@ -388,3 +388,216 @@
 
 ---
 
+The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
+
+- monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
+- upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
+- upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
+- once a customer churns they will no longer make payments
+
+**Payments Table:**
+
+    WITH lead AS (
+    	SELECT *,
+    		LEAD(start_date) OVER(
+          	PARTITION BY customer_id
+          	ORDER BY customer_id, start_date) AS end_date
+    	FROM foodie_fi.subscriptions
+    	WHERE plan_id <> 0
+    	ORDER BY customer_id)
+    
+    , ending AS (
+      SELECT customer_id,
+      	plan_id,
+      	start_date,
+      	CASE WHEN end_date IS NULL
+      		THEN '2020-12-31'
+      		WHEN start_date = end_date
+      		THEN end_date - 1
+      		ELSE end_date END AS end_date
+      FROM lead
+      ORDER BY customer_id)
+    
+    SELECT e.customer_id,
+    	e.plan_id,
+        p.plan_name,
+        GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month') AS payment_date,
+        p.price,
+        RANK() OVER(
+          PARTITION BY e.customer_id
+          ORDER BY GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month')) AS payment_order
+    FROM ending AS e
+    JOIN foodie_fi.plans AS p
+    ON e.plan_id = p.plan_id
+    WHERE e.plan_id <> 4
+    ORDER BY e.customer_id
+    LIMIT 50;
+
+| customer_id | plan_id | plan_name     | payment_date             | price  | payment_order |
+| ----------- | ------- | ------------- | ------------------------ | ------ | ------------- |
+| 1           | 1       | basic monthly | 2020-08-08T00:00:00.000Z | 9.90   | 1             |
+| 1           | 1       | basic monthly | 2020-09-08T00:00:00.000Z | 9.90   | 2             |
+| 1           | 1       | basic monthly | 2020-10-08T00:00:00.000Z | 9.90   | 3             |
+| 1           | 1       | basic monthly | 2020-11-08T00:00:00.000Z | 9.90   | 4             |
+| 1           | 1       | basic monthly | 2020-12-08T00:00:00.000Z | 9.90   | 5             |
+| 2           | 3       | pro annual    | 2020-09-27T00:00:00.000Z | 199.00 | 1             |
+| 2           | 3       | pro annual    | 2020-10-27T00:00:00.000Z | 199.00 | 2             |
+| 2           | 3       | pro annual    | 2020-11-27T00:00:00.000Z | 199.00 | 3             |
+| 2           | 3       | pro annual    | 2020-12-27T00:00:00.000Z | 199.00 | 4             |
+| 3           | 1       | basic monthly | 2020-01-20T00:00:00.000Z | 9.90   | 1             |
+| 3           | 1       | basic monthly | 2020-02-20T00:00:00.000Z | 9.90   | 2             |
+| 3           | 1       | basic monthly | 2020-03-20T00:00:00.000Z | 9.90   | 3             |
+| 3           | 1       | basic monthly | 2020-04-20T00:00:00.000Z | 9.90   | 4             |
+| 3           | 1       | basic monthly | 2020-05-20T00:00:00.000Z | 9.90   | 5             |
+| 3           | 1       | basic monthly | 2020-06-20T00:00:00.000Z | 9.90   | 6             |
+| 3           | 1       | basic monthly | 2020-07-20T00:00:00.000Z | 9.90   | 7             |
+| 3           | 1       | basic monthly | 2020-08-20T00:00:00.000Z | 9.90   | 8             |
+| 3           | 1       | basic monthly | 2020-09-20T00:00:00.000Z | 9.90   | 9             |
+| 3           | 1       | basic monthly | 2020-10-20T00:00:00.000Z | 9.90   | 10            |
+| 3           | 1       | basic monthly | 2020-11-20T00:00:00.000Z | 9.90   | 11            |
+| 3           | 1       | basic monthly | 2020-12-20T00:00:00.000Z | 9.90   | 12            |
+| 4           | 1       | basic monthly | 2020-01-24T00:00:00.000Z | 9.90   | 1             |
+| 4           | 1       | basic monthly | 2020-02-24T00:00:00.000Z | 9.90   | 2             |
+| 4           | 1       | basic monthly | 2020-03-24T00:00:00.000Z | 9.90   | 3             |
+| 5           | 1       | basic monthly | 2020-08-10T00:00:00.000Z | 9.90   | 1             |
+| 5           | 1       | basic monthly | 2020-09-10T00:00:00.000Z | 9.90   | 2             |
+| 5           | 1       | basic monthly | 2020-10-10T00:00:00.000Z | 9.90   | 3             |
+| 5           | 1       | basic monthly | 2020-11-10T00:00:00.000Z | 9.90   | 4             |
+| 5           | 1       | basic monthly | 2020-12-10T00:00:00.000Z | 9.90   | 5             |
+| 6           | 1       | basic monthly | 2020-12-30T00:00:00.000Z | 9.90   | 1             |
+| 6           | 1       | basic monthly | 2021-01-30T00:00:00.000Z | 9.90   | 2             |
+| 7           | 1       | basic monthly | 2020-02-12T00:00:00.000Z | 9.90   | 1             |
+| 7           | 1       | basic monthly | 2020-03-12T00:00:00.000Z | 9.90   | 2             |
+| 7           | 1       | basic monthly | 2020-04-12T00:00:00.000Z | 9.90   | 3             |
+| 7           | 1       | basic monthly | 2020-05-12T00:00:00.000Z | 9.90   | 4             |
+| 7           | 2       | pro monthly   | 2020-05-22T00:00:00.000Z | 19.90  | 5             |
+| 7           | 2       | pro monthly   | 2020-06-22T00:00:00.000Z | 19.90  | 6             |
+| 7           | 2       | pro monthly   | 2020-07-22T00:00:00.000Z | 19.90  | 7             |
+| 7           | 2       | pro monthly   | 2020-08-22T00:00:00.000Z | 19.90  | 8             |
+| 7           | 2       | pro monthly   | 2020-09-22T00:00:00.000Z | 19.90  | 9             |
+| 7           | 2       | pro monthly   | 2020-10-22T00:00:00.000Z | 19.90  | 10            |
+| 7           | 2       | pro monthly   | 2020-11-22T00:00:00.000Z | 19.90  | 11            |
+| 7           | 2       | pro monthly   | 2020-12-22T00:00:00.000Z | 19.90  | 12            |
+| 8           | 1       | basic monthly | 2020-06-18T00:00:00.000Z | 9.90   | 1             |
+| 8           | 1       | basic monthly | 2020-07-18T00:00:00.000Z | 9.90   | 2             |
+| 8           | 2       | pro monthly   | 2020-08-03T00:00:00.000Z | 19.90  | 3             |
+| 8           | 2       | pro monthly   | 2020-09-03T00:00:00.000Z | 19.90  | 4             |
+| 8           | 2       | pro monthly   | 2020-10-03T00:00:00.000Z | 19.90  | 5             |
+| 8           | 2       | pro monthly   | 2020-11-03T00:00:00.000Z | 19.90  | 6             |
+| 8           | 2       | pro monthly   | 2020-12-03T00:00:00.000Z | 19.90  | 7             |
+
+---
+#### 1. How would you calculate the rate of growth for Foodie-Fi?
+
+    WITH lead AS (
+    	SELECT *,
+    		LEAD(start_date) OVER(
+          	PARTITION BY customer_id
+          	ORDER BY customer_id, start_date) AS end_date
+    	FROM foodie_fi.subscriptions
+    	WHERE plan_id <> 0
+    	ORDER BY customer_id)
+    
+    , ending AS (
+      SELECT customer_id,
+      	plan_id,
+      	start_date,
+      	CASE WHEN end_date IS NULL
+      		THEN '2020-12-31'
+      		WHEN start_date = end_date
+      		THEN end_date - 1
+      		ELSE end_date END AS end_date
+      FROM lead
+      ORDER BY customer_id)
+    
+    , payments AS (
+      SELECT e.customer_id,
+    	e.plan_id,
+        p.plan_name,
+        GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month') AS payment_date,
+        p.price,
+        RANK() OVER(
+          PARTITION BY e.customer_id
+          ORDER BY GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month')) AS payment_order
+      FROM ending AS e
+      JOIN foodie_fi.plans AS p
+      ON e.plan_id = p.plan_id
+      WHERE e.plan_id <> 4
+      ORDER BY e.customer_id)
+    
+    SELECT EXTRACT(month FROM payment_date) AS month,
+    	COUNT(DISTINCT customer_id) AS customer_count
+    FROM payments
+    WHERE EXTRACT(month FROM payment_date) IN (1, 12)
+    GROUP BY EXTRACT(month FROM payment_date);
+
+| month | customer_count |
+| ----- | -------------- |
+| 1     | 216            |
+| 12    | 752            |
+
+
+    SELECT ((752 - 216) / 216) * 100 AS customer_growth_rate_percentage;
+
+| customer_growth_rate_percentage |
+| ------------------------------- |
+| 200                             |
+
+
+    WITH lead AS (
+    	SELECT *,
+    		LEAD(start_date) OVER(
+          	PARTITION BY customer_id
+          	ORDER BY customer_id, start_date) AS end_date
+    	FROM foodie_fi.subscriptions
+    	WHERE plan_id <> 0
+    	ORDER BY customer_id)
+    
+    , ending AS (
+      SELECT customer_id,
+      	plan_id,
+      	start_date,
+      	CASE WHEN end_date IS NULL
+      		THEN '2020-12-31'
+      		WHEN start_date = end_date
+      		THEN end_date - 1
+      		ELSE end_date END AS end_date
+      FROM lead
+      ORDER BY customer_id)
+    
+    , payments AS (
+      SELECT e.customer_id,
+    	e.plan_id,
+        p.plan_name,
+        GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month') AS payment_date,
+        p.price,
+        RANK() OVER(
+          PARTITION BY e.customer_id
+          ORDER BY GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month')) AS payment_order
+      FROM ending AS e
+      JOIN foodie_fi.plans AS p
+      ON e.plan_id = p.plan_id
+      WHERE e.plan_id <> 4
+      ORDER BY e.customer_id)
+    
+    SELECT EXTRACT(month FROM payment_date) AS month,
+    	SUM(price) AS profit
+    FROM payments
+    WHERE EXTRACT(month FROM payment_date) IN (1, 12)
+    GROUP BY EXTRACT(month FROM payment_date);
+
+| month | profit   |
+| ----- | -------- |
+| 12    | 47907.20 |
+| 1     | 4620.60  |
+
+
+
+    SELECT ROUND(((47907.20 - 4620.60) / 4620.60) * 100, 0) AS profit_growth_rate_percentage;
+
+| profit_growth_rate_percentage |
+| ----------------------------- |
+| 937                           |
+
+---
+
