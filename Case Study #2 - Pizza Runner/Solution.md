@@ -4,15 +4,20 @@
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-2/)
 
 ## Table of Contents
-- [Business Task](##business-task)
 
-## ✏️ Business Task
+[Business Task](#business-task)  
+[Data Limitations](#data-limitations)
+
+    
+## Business Task
 
 Danny has a pizza restaurant and he wants to expand his business by hiring runners to pick up pizzas from Pizza Runner Headquarters and deliver them right the the customer's home. He would like to take a look at how the runner system is working and see if it is worth expanding the program.
+
 
 ## ⚠️ Data Limitations
 
 The first limitation I noticed with this data is the fact that there aren't enough runners in the program yet to spot any real trends in some areas. Another limitation is that a couple of the fields are a bit ambiguous. In a real situation, I would be able to reach out for clarification, but in this case I used my best judgement. An example of this is the difference between the order time and the pickup time. There are a couple of questions that ask how long the pizza takes to prepare and how long the runner takes to show up for the order. I am unable to know if the pizza has been done and waiting when the runner arrives, or if the runners are waiting on the pizzas to finish cooking. For this case study, I used the difference between the two times for both situations and if there is an area of concern, it can be investigated further.
+
 
 ## 🍅 Data
 
