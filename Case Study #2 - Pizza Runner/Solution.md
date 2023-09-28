@@ -665,19 +665,25 @@ Insights:
 - It was added 5 times
 
 ---
-#### 3. What was the most common exclusion?  - FIX THIS!!!!
+#### 3. What was the most common exclusion? 
 
-    WITH unnested AS (
-      SELECT order_id,
+    WITH row_number AS (
+      SELECT ROW_NUMBER() OVER(
+        ORDER BY order_id) AS num_pizza,
+      *
+      FROM pizza_runner.customer_orders)
+      
+    , unnested AS (
+      SELECT num_pizza,
+      	order_id,
       	pizza_id,
       	(UNNEST(STRING_TO_ARRAY(exclusions, ',')))::INT AS exclusions
-      FROM pizza_runner.customer_orders)
+      FROM row_number)
+    
     
     SELECT t.topping_name,
     	COUNT(t.topping_name) AS times_excluded
-    FROM pizza_runner.customer_orders AS c
-    LEFT JOIN unnested AS u
-    ON c.order_id = u.order_id
+    FROM unnested AS u
     JOIN pizza_runner.pizza_toppings AS t
     ON u.exclusions = t.topping_id
     GROUP BY t.topping_name
@@ -686,14 +692,23 @@ Insights:
 
 | topping_name | times_excluded |
 | ------------ | -------------- |
-| Cheese       | 10             |
+| Cheese       | 4              |
+
 
 Steps:
 - I used the same code as the question above, except I changed extras to exclusions
+  - When I did this, I noticed that the number was wrong because I was getting duplicates. This was happening because there was one order that ordered two pizzas that were the same type, and both excluded cheese
+- To fix this, I created a CTE to number the individual pizzas ordered
+- Used that CTE to separate and unnest the exclusions
+- Changed the exlusions to INT data type
+- Joined the CTE to the pizza toppings table to get the topping names
+- Counted the pizza toppings
+- Grouped by pizza toppings to get the number of times each individual topping was counted
+- Ordered by the times excluded in descending order so that the most excluded item was listed first
+- Limited to 1 so that it only showed the most exlcluded topping
 
 Insights:
 - Cheese was the most commonly exluded topping
-- It was not exluded 10 times... I need to go back and number my rows so I don't end up with duplicates
 
 ---
 
