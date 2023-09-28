@@ -6,7 +6,7 @@
 ## 📚 Table of Contents
 
 - [Business Task](#%EF%B8%8F-business-task)  
-- [Data Limitations](#-data-limitations)  
+- [Data Limitations](#%EF%B8%8F-data-limitations)  
 - [Data](#-data)  
 - [Data Cleaning](#-data-cleaning)  
 - [Case Study Questions](#-case-study-questions)  
