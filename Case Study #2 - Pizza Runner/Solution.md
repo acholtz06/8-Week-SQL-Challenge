@@ -11,6 +11,10 @@
 [Data Cleaning](#-data-cleaning)  
 [Case Study Questions](#-case-study-questions)  
 [A. Pizza Metrics](#-a-pizza-metrics)  
+[B. Runner and Customr Experience](#-b-runner-and-customer-experience)  
+[C. Ingredient Optimisation](#-c-ingredient-optimisation)  
+[D. Pricing and Ratings](#-d-pricing-and-ratings)  
+[Final Thoughts](#-final-thoughts)
 
 
 
