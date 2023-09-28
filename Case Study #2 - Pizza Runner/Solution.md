@@ -5,7 +5,7 @@
 
 ## 📚 Table of Contents
 
-- [Business Task](#-business-task)  
+- [Business Task](#%EF%B8%8F-business-task)  
 - [Data Limitations](#-data-limitations)  
 - [Data](#-data)  
 - [Data Cleaning](#-data-cleaning)  
