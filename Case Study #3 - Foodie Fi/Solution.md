@@ -3,6 +3,17 @@
 ![Foodie-FI](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/7fb14a2f-eb1f-4903-809e-b3fd7431f31e)
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-3/)
 
+## 📚 Table of Contents
+- [Business Task](#-business-task)
+- [Data Limitations](#-data-limitations)
+- [Data](#-data)
+- [Case Study Questions](#-case-study-questions)
+    - [A. Customer Journey](#-a-customer-journey)
+    - [B. Data Analysis Questions](#-b-data-analysis-questions)
+    - [C. Challenge Payment Question](#-c-challenge-payment-question)
+    - [D. Outside the Box Questions](#-d-outside-the-box-questions)
+- [Final Thoughts](#-final-thoughts)
+
 ## ✏️ Business Task
 
 ## ⚠️ Data Limitations
