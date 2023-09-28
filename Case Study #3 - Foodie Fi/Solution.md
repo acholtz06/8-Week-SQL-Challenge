@@ -4,8 +4,8 @@
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-3/)
 
 ## 📚 Table of Contents
-- [Business Task](#-business-task)
-- [Data Limitations](#-data-limitations)
+- [Business Task](#%EF%B8%8F-business-task)
+- [Data Limitations](#%EF%B8%8F-data-limitations)
 - [Data](#-data)
 - [Case Study Questions](#-case-study-questions)
     - [A. Customer Journey](#-a-customer-journey)
