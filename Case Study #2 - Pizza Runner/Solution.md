@@ -793,26 +793,23 @@ Insights:
 | 10       | Meatlovers - Extra Bacon, Cheese - Exclude BBQ Sauce, Mushrooms |
 
 Steps:
-CTE #1:
-- Numbered the rows and ordered by the order number so that each pizza ordered had a number and avoid future duplicates
-
-CTE #2:
-- Created a subquery in the FROM clause where I used STRING_TO_ARRAY and unnested so that the extras were separated. I also changed the data type to INT in this subquery
-- Joined the subquery to the pizza toppings table to get the topping names
-- Made sure to carry the row numbers through
-- Used STRING_AGG to create the list of extras for each pizza
-- Grouped by all non aggregated columns selected
-
-CTE #3:
-- Used the same code as the previous CTE, just changed extras to exlusions
-
-Final Query:
-- Used the first CTE where the rows were numbered and left joined the extras CTE on all appropriate columns
-- Left joined the exlusions CTE on all appropriate columns
-- Joined the pizza names table
-- Concatenated ' - Extra ' before the listed extras and ' - Exclude ' before the listed exclusions
-- Used COALESCE so that the text only appeared before the non null values
-- Used CONCAT to put that together with the pizza names
+- CTE #1:
+    - Numbered the rows and ordered by the order number so that each pizza ordered had a number and avoid future duplicates
+- CTE #2:
+    - Created a subquery in the FROM clause where I used STRING_TO_ARRAY and unnested so that the extras were separated. I also changed the data type to INT in this subquery
+    - Joined the subquery to the pizza toppings table to get the topping names
+    - Made sure to carry the row numbers through
+    - Used STRING_AGG to create the list of extras for each pizza
+    - Grouped by all non aggregated columns selected
+- CTE #3:
+    - Used the same code as the previous CTE, just changed extras to exlusions
+- Final Query:
+    - Used the first CTE where the rows were numbered and left joined the extras CTE on all appropriate columns
+    - Left joined the exlusions CTE on all appropriate columns
+    - Joined the pizza names table
+    - Concatenated ' - Extra ' before the listed extras and ' - Exclude ' before the listed exclusions
+    - Used COALESCE so that the text only appeared before the non null values
+    - Used CONCAT to put that together with the pizza names
 
 Insights:
 - This is a table that is created for the restaurant to more easily read the orders
@@ -970,51 +967,41 @@ Insights:
 | 10       | Meatlovers: 2xBacon, Beef, 2xCheese, Chicken, Pepperoni, Salami                     |
 
 Steps:
-CTE #1:
-- Used the same code as the previous question to number the rows
-
-CTE #2:
-- Instead of using subqueries, this time I used a CTE to separate and unnest the extras and exlusions into their own rows
-- Changed the data types to INT
-
-CTE #3:
-- Used the same code from the previous problem, except I joined the CTE instead of the subquery
-
-CTE #4:
-- Used the same code from the previous problem, except I joined the CTE instead of the subquery
-
-CTE #5:
-- This was to bring together all pizzas ordered with their exlusions and extras
-- Used the first CTE and left joined the exclusions table on all appropriate columns
-- Left joined the extras table on all appropriate columns
-
-CTE #6:
-- Used the code from question #1 to separate and unnest all of the toppings
-
-CTE #7:
-- Used the code from question #1 to get all of the topping names
-- Did not used STRING_AGG like in question #1 because I wanted to keep them all separated for now
-
-CTE #8:
-- Joined the previous CTE to the pizza toppings table to get all of the topping names
-- Included the topping name in the ORDER BY statement so that they were ordered alphabetically
-- Ended up with a list of every pizza ordered, all toppings included with the pizza, and any exclusions or extras
-
-CTE #9:
-- Used the previous CTE
-- Created a CASE statement. For exclusions, if the text in the exlusions column matched any part of the toppings column, then it would be left null. Otherwise, there would be 'X'
-- For extras, if the text in the extras column matched any part of the toppings column, then it would concatenate '2x' with the topping name. Otherwise, it would just show the topping name
-
-CTE #10:
-- Used the previous CTE
-- Created a CASE statement that combined the two previous CASE statements
-- If exlusions was null, then it would be null
-- Otherwise, it would show what as in the extras column
-
-Final Query:
-- Used STRING_AGG to put all ingredients into one row separated by the ', ' delimiter
-- Used CONCAT to add the pizza name and ': ' before the list of ingredients
-- Made sure to group by the row number, order id, and pizza id to make sure that there was one row for each pizza ordered
+- CTE #1:
+    - Used the same code as the previous question to number the rows
+- CTE #2:
+    - Instead of using subqueries, this time I used a CTE to separate and unnest the extras and exlusions into their own rows
+    - Changed the data types to INT
+- CTE #3:
+    - Used the same code from the previous problem, except I joined the CTE instead of the subquery
+- CTE #4:
+    - Used the same code from the previous problem, except I joined the CTE instead of the subquery
+- CTE #5:
+    - This was to bring together all pizzas ordered with their exlusions and extras
+    - Used the first CTE and left joined the exclusions table on all appropriate columns
+    - Left joined the extras table on all appropriate columns
+- CTE #6:
+    - Used the code from question #1 to separate and unnest all of the toppings
+- CTE #7:
+    - Used the code from question #1 to get all of the topping names
+    - Did not used STRING_AGG like in question #1 because I wanted to keep them all separated for now
+- CTE #8:
+    - Joined the previous CTE to the pizza toppings table to get all of the topping names
+    - Included the topping name in the ORDER BY statement so that they were ordered alphabetically
+    - Ended up with a list of every pizza ordered, all toppings included with the pizza, and any exclusions or extras
+- CTE #9:
+    - Used the previous CTE
+    - Created a CASE statement. For exclusions, if the text in the exlusions column matched any part of the toppings column, then it would be left null. Otherwise, there would be 'X'
+    - For extras, if the text in the extras column matched any part of the toppings column, then it would concatenate '2x' with the topping name. Otherwise, it would just show the topping name
+- CTE #10:
+    - Used the previous CTE
+    - Created a CASE statement that combined the two previous CASE statements
+    - If exlusions was null, then it would be null
+    - Otherwise, it would show what as in the extras column
+- Final Query:
+    - Used STRING_AGG to put all ingredients into one row separated by the ', ' delimiter
+    - Used CONCAT to add the pizza name and ': ' before the list of ingredients
+    - Made sure to group by the row number, order id, and pizza id to make sure that there was one row for each pizza ordered
 
 Insights:
 - This is a table created to show a readable recipe of ingredients for each pizza ordered
@@ -1117,37 +1104,29 @@ Insights:
 
 
 Steps:
-
-CTE #1:
-- Used the same CTE as above, except joined the runners table and filtered for only delivered pizzas
-
-CTE #2:
-- Used the same CTE as above to separate all of the extras and exclusions and separate them into their own rows
-
-CTE #3:
-- Joined the previous CTE to the pizza toppings table
-- Counted the number of times each topping was excluded
-- Grouped by the ingredient
-
-CTE #4:
-- Used the same code as the previous CTE, but changed to extas where applicable
-
-CTE #5:
-- Used the same code as previous questions to ungroup and unnest the pizza toppings used on each pizza
-
-CTE #6:
-- Joined the numbered table to the recipes table to get the order numbers, pizzas ordered, and the toppings that are included on each pizza
-- Joined the pizza toppings table to get the names of the toppings
-- Counted the topping names
-- Grouped by the topping name to see how many times each topping was used
-
-CTE #7:
-- Used the previous CTE and left joined the exclusions and extras tables to make sure I kept all pizzas ordered
-- Used CASE statements to change any *null* values to 0 so that they could be used in arethmetic
-
-Final Query:
-- Took the times the toppings were used in a standard recipe, subtracted the times the topping was exluded, and added the times the topping was added as an extra
-- Ordered the results in descending order so that the most frequently used topping was listed first
+- CTE #1:
+    - Used the same CTE as above, except joined the runners table and filtered for only delivered pizzas
+- CTE #2:
+    - Used the same CTE as above to separate all of the extras and exclusions and separate them into their own rows
+- CTE #3:
+    - Joined the previous CTE to the pizza toppings table
+    - Counted the number of times each topping was excluded
+    - Grouped by the ingredient
+- CTE #4:
+    - Used the same code as the previous CTE, but changed to extas where applicable
+- CTE #5:
+    - Used the same code as previous questions to ungroup and unnest the pizza toppings used on each pizza
+- CTE #6:
+    - Joined the numbered table to the recipes table to get the order numbers, pizzas ordered, and the toppings that are included on each pizza
+    - Joined the pizza toppings table to get the names of the toppings
+    - Counted the topping names
+    - Grouped by the topping name to see how many times each topping was used
+- CTE #7:
+    - Used the previous CTE and left joined the exclusions and extras tables to make sure I kept all pizzas ordered
+    - Used CASE statements to change any *null* values to 0 so that they could be used in arethmetic
+- Final Query:
+    - Took the times the toppings were used in a standard recipe, subtracted the times the topping was exluded, and added the times the topping was added as an extra
+    - Ordered the results in descending order so that the most frequently used topping was listed first
 
 Insights:
 - Bacon is the most used topping
@@ -1292,16 +1271,16 @@ Steps:
 
 ---
 #### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
-#### - order_id
-#### - customer_id
-#### - runner_id
-#### - rating
-#### - order_time
-#### - pickup_time
-#### - time between order and pickup
-#### - delivery duration
-#### - average speed
-#### - total number of pizzas
+**- order_id**  
+**- customer_id**  
+**- runner_id**  
+**- rating**  
+**- order_time**  
+**- pickup_time**  
+**- time between order and pickup**  
+**- delivery duration**  
+**- average speed**  
+**- total number of pizzas**  
 
     SELECT rt.*,
     	c.order_time,
@@ -1382,8 +1361,5 @@ Insights:
 - The restaurant had $73.38 left after paying the runners
 
 ---
-
-### 🏆 E. Bonus Questions
-#### If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 
 ## 🚀 Final Thoughts
