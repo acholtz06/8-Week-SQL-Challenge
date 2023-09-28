@@ -1100,6 +1100,45 @@ Insights:
 | Peppers      | 3          |
 | Tomato Sauce | 3          |
 
+
+Steps:
+
+CTE #1:
+- Used the same CTE as above, except joined the runners table and filtered for only delivered pizzas
+
+CTE #2:
+- Used the same CTE as above to separate all of the extras and exclusions and separate them into their own rows
+
+CTE #3:
+- Joined the previous CTE to the pizza toppings table
+- Counted the number of times each topping was excluded
+- Grouped by the ingredient
+
+CTE #4:
+- Used the same code as the previous CTE, but changed to extas where applicable
+
+CTE #5:
+- Used the same code as previous questions to ungroup and unnest the pizza toppings used on each pizza
+
+CTE #6:
+- Joined the numbered table to the recipes table to get the order numbers, pizzas ordered, and the toppings that are included on each pizza
+- Joined the pizza toppings table to get the names of the toppings
+- Counted the topping names
+- Grouped by the topping name to see how many times each topping was used
+
+CTE #7:
+- Used the previous CTE and left joined the exclusions and extras tables to make sure I kept all pizzas ordered
+- Used CASE statements to change any *null* values to 0 so that they could be used in arethmetic
+
+Final Query:
+- Took the times the toppings were used in a standard recipe, subtracted the times the topping was exluded, and added the times the topping was added as an extra
+- Ordered the results in descending order so that the most frequently used topping was listed first
+
+Insights:
+- Bacon is the most used topping
+- Everything besides tomatoes, onions, peppers, and tomato sauce was used between 8-12 times
+- Tomatoes, onions, peppers, and tomato sauce were used only 3 times each
+  
 ---
 
 ### 💰 D. Pricing and Ratings
@@ -1123,6 +1162,16 @@ Insights:
 | dollars |
 | ------- |
 | 138     |
+
+Steps:
+- Created a CTE called prices
+- Used a CASE statement to set the price of each pizza offered
+- Joined the CTE to the runner orders table
+- Found the sum of the prices
+- Filtered for only successful deliveries
+
+Insights:
+- The restaurant made $138 on pizzas ordered through the runner program with standard pricing
 
 ---
 #### 2. What if there was an additional $1 charge for any pizza extras?
@@ -1148,6 +1197,17 @@ Insights:
 | ------- |
 | 142     |
 
+Steps:
+- Created a CTE called prices
+- Created a CASE statement where I set the price for each of the pizzas offered
+- Created a second CASE statemenet that stated if there was one extra, then it is 1 dollar extra, if there were 4 characters (or 2 extras), then it is 2 dollars extra, and so on
+- Joined the CTE to the runner orders table
+- Found the sum of the standard pizza prices and added it to the sum of the add ons
+- Filtered for only successful deliveries
+
+Insights:
+- The restaurant made $142 on orders made through the runner program with extras added on
+  
 ---
 #### 3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 
@@ -1209,6 +1269,12 @@ Insights:
 | 8        | 102         | 2         | 5      |
 | 10       | 104         | 1         | 5      |
 
+Steps:
+- Created a new table called ratings
+- Used the runner orders table and left joined the customer orders table
+- Filtered for orders that were not cancelled
+- Went through and added a rating for each order
+
 ---
 #### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
 #### - order_id
@@ -1257,6 +1323,17 @@ Insights:
 | 8        | 102         | 2         | 5      | 2020-01-09T23:54:33.000Z | 2020-01-10T00:15:02.000Z | 20                         | 15               | 93.6    | 1          |
 | 10       | 104         | 1         | 5      | 2020-01-11T18:34:49.000Z | 2020-01-11T18:50:20.000Z | 15                         | 10               | 60.0    | 2          |
 
+Steps:
+- Joined the ratings table and the customer orders table
+- Joined the ratings table and the runner orders table
+- Subtracted the order time from the pickup time and extracted the minutes
+- Used the same formula that I used before to calulate the avg kph
+- Counted the pizzas
+- Grouped by all non aggregated fields
+
+Insights:
+- This table provides a good overview of the journey of each order placed
+  
 ---
 #### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
 
@@ -1277,6 +1354,17 @@ Insights:
 | dollars_left |
 | ------------ |
 | 73.38        |
+
+Steps:
+- Created a CTE called prices
+- Joined the customer orders and the runner orders tables
+- Used a CASE statement to set the pizza prices
+- Took the distance in km and multiplied by $0.30 to get how much the runner made
+- Used the CTE to take the sum of the total price and subtract the sum of the runner pay
+- Filtered for successful deliveries
+
+Insights:
+- The restaurant had $73.38 left after paying the runners
 
 ---
 
