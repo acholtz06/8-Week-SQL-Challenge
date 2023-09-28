@@ -6,12 +6,12 @@
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-1/)
 
 ## 📚 Table of Contents
-[Business Task](#%EF%B8%8F-business-task)  
-[Data Limitations](#%EF%B8%8F-data-limitations)
-[Data](#-data)  
-[Case Study Questions](#-case-study-questions)  
-[Bonus Questions](#-bonus-questions)  
-[Final Thoughts](#-final-thoughts)
+- [Business Task](#%EF%B8%8F-business-task)  
+- [Data Limitations](#%EF%B8%8F-data-limitations)
+- [Data](#-data)  
+- [Case Study Questions](#-case-study-questions)  
+- [Bonus Questions](#-bonus-questions)  
+- [Final Thoughts](#-final-thoughts)
 
 ## ✏️ Business Task
 Danny wants to take a closer look at the habits of his customers, such as spending patterns, popular menu items, and number of visits. The diner has a customer rewards program that already exists, and he wants to see if there are ways that the program can be modified to improve the overall customer experience. The case study has provided a list of questions that can help to aid in making desicions about the menu and the rewards program.
@@ -507,7 +507,7 @@ Steps:
 - Used a CASE statment to rank the order dates for only member orders. This was done by saying that if the member staus was 'Y', then DENSE_RANK() the order dates, partitioning by customer id and also by member status so that the non-member orders aren't ranked. All other orders are set to null
 ---
 
-## 🚀Final Thoughts
+## 🚀 Final Thoughts
 
 Thinking back to the busniess task, we wanted to analyze this data to see how the rewards program was doing and also to see if there were any potential changes that could be made to improve the customer experience. There were some insights that were gained while doing the analysis that I think could be helpful to Danny as he evaluates the membership program.
 
