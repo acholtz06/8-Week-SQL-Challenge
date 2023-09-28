@@ -8,6 +8,10 @@
 [Business Task](#-business-task)  
 [Data Limitations](#-data-limitations)  
 [Data](#-data)  
+[Data Cleaning](#-data-cleaning)  
+[Case Study Questions](#-case-study-questions)  
+[A. Pizza Metrics](#-a-pizza-metrics)  
+
 
 
     
