@@ -1359,7 +1359,17 @@ Steps:
 
 Insights:
 - The restaurant had $73.38 left after paying the runners
+- Looking back, I can see that almost half the money made from the pizzas went to the runners
 
 ---
 
 ## 🚀 Final Thoughts
+
+This was a big jump in difficulty from the last case study and I really enjoyed the challenge!  
+  
+Overall, I don't think there is enough data to draw very many conclusions. It is hard to tell how successful the pizza runner program is when I don't have the regular restaurant data to see how many orders they usually get and compare it to the pizza runner orders. I can tell, however, that if the program is going to expand and take take more orders, the restaurant will need to get more runners to sign up. Out of the 4 runners listed, only 3 have taken any orders and they were the first 3 to sign up. Advertising the program as well as advertising that runners are needed could help keep the program balanced out. The data can also show which ingredients need to have larger quantities on hand, and which aren't as popular. Again, the limited amount of data makes this difficult because the data shows that cheese is the most commonly exluded item, but 3 out of the 4 times it was excluded was from the same customer.  
+  
+Another thing I noticed is that I can see the pizza runner program still made money after paying the runners, but I don't have any data showing how much overhead there is in making the pizzas, like the employees, ingredients, supplies, etc. Without this data, I do not know if the program actually made money in the end.  
+  
+Thank you so much for sticking with me on this one!
+
