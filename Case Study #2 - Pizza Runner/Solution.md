@@ -5,23 +5,25 @@
 
 ## Table of Contents
 
-[Business Task](#-business-task)  
-[Data Limitations](#-data-limitations)  
-[Data](#-data)  
-[Data Cleaning](#-data-cleaning)  
-[Case Study Questions](#-case-study-questions)  
-[A. Pizza Metrics](#-a-pizza-metrics)  
-[B. Runner and Customr Experience](#-b-runner-and-customer-experience)  
-[C. Ingredient Optimisation](#-c-ingredient-optimisation)  
-[D. Pricing and Ratings](#-d-pricing-and-ratings)  
-[Final Thoughts](#-final-thoughts)
+- [Business Task](#-business-task)  
+- [Data Limitations](#-data-limitations)  
+- [Data](#-data)  
+- [Data Cleaning](#-data-cleaning)  
+- [Case Study Questions](#-case-study-questions)  
+    - [A. Pizza Metrics](#-a-pizza-metrics)  
+    - [B. Runner and Customr Experience](#-b-runner-and-customer-experience)  
+    - [C. Ingredient Optimisation](#-c-ingredient-optimisation)  
+    - [D. Pricing and Ratings](#-d-pricing-and-ratings)  
+[Final Thoughts](#-final-thoughts)  
+
 
 
 
     
 ## ✏️ Business Task
 
-Danny has a pizza restaurant and he wants to expand his business by hiring runners to pick up pizzas from Pizza Runner Headquarters and deliver them right the the customer's home. He would like to take a look at how the runner system is working and see if it is worth expanding the program.
+Danny has a pizza restaurant and he wants to expand his business by hiring runners to pick up pizzas from Pizza Runner Headquarters and deliver them right the the customer's home. He would like to take a look at how the runner system is working and see if it is worth expanding the program.  
+
 
 
 ## ⚠️ Data Limitations
