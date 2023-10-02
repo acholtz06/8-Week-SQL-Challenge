@@ -1,10 +1,19 @@
-# Case Study #4 - Data Bank
+# 🏦 Case Study #4 - Data Bank
 
 ![Data Bank](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/7e07a5b1-7260-4089-934d-e773278f68fa)
+###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-4/)
+
+## 📚 Table of Contents
+
+## ✏️ Business Task
+
+## ⚠️ Data Limitations
+
+## 🗺️ Data
 
 
-## Case Study Questions
-### A. Customer Nodes Exploration
+## 📈 Case Study Questions
+### 🖥️ A. Customer Nodes Exploration
 #### 1. How many unique nodes are there on the Data Bank system?
 
     SELECT COUNT(DISTINCT node_id) AS unique_nodes
@@ -90,3 +99,5 @@
 | Europe      | 18     | 28            | 2914527       |
 
 ---
+
+## Final Thoughts
