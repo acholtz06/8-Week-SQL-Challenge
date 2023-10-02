@@ -100,4 +100,6 @@
 
 ---
 
-## Final Thoughts
+### 👩‍💻 B. Customer Transactions
+
+## 🚀 Final Thoughts
