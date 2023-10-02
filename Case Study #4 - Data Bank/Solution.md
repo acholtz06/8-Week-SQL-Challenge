@@ -1,5 +1,8 @@
 # Case Study #4 - Data Bank
 
+![Data Bank](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/7e07a5b1-7260-4089-934d-e773278f68fa)
+
+
 ## Case Study Questions
 ### A. Customer Nodes Exploration
 #### 1. How many unique nodes are there on the Data Bank system?
