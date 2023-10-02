@@ -1,4 +1,7 @@
+# Case Study #4 - Data Bank
 
+## Case Study Questions
+### A. Customer Nodes Exploration
 #### 1. How many unique nodes are there on the Data Bank system?
 
     SELECT COUNT(DISTINCT node_id) AS unique_nodes
