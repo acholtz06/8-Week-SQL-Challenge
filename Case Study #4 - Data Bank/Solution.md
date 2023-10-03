@@ -4,6 +4,16 @@
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-4/)
 
 ## 📚 Table of Contents
+- [Business Task](#%EF%B8%8F-business-task)
+- [Data Limitations](#%EF%B8%8F-data-limitations)
+- [Data](#-data)
+- [Case Study Questions](#-case-study-questions)
+    - [A. Customer Nodes Exploration](#-a-customer-nodes-exploration)
+    - [B. Customer Transactions](#-b-customer-transactions)
+    - [C. Data Allocation Challenge](#-c-data-allocation-challenge)
+- [Final Thoughts](#-final-thoughts)
+          
+
 
 ## ✏️ Business Task
 
@@ -285,7 +295,7 @@
 
 ---
 
-### 📊 Data Allocation Challenge
+### 📊 C. Data Allocation Challenge
 To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
 
 - Option 1: data is allocated based off the amount of money at the end of the previous month
