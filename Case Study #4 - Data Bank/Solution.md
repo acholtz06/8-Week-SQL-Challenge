@@ -6,9 +6,9 @@
 ## 📚 Table of Contents
 - [Business Task](#%EF%B8%8F-business-task)
 - [Data Limitations](#%EF%B8%8F-data-limitations)
-- [Data](#-data)
+- [Data](#%EF%B8%8F-data)
 - [Case Study Questions](#-case-study-questions)
-    - [A. Customer Nodes Exploration](#-a-customer-nodes-exploration)
+    - [A. Customer Nodes Exploration](#%EF%B8%8F-a-customer-nodes-exploration)
     - [B. Customer Transactions](#-b-customer-transactions)
     - [C. Data Allocation Challenge](#-c-data-allocation-challenge)
 - [Final Thoughts](#-final-thoughts)
