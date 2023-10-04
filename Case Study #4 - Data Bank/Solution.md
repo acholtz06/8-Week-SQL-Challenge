@@ -38,7 +38,7 @@
 #### 2. What is the number of nodes per region?
 
     SELECT r.region_name,
-    	COUNT(c.node_id) AS num_nodes
+    	COUNT(DISTINCT c.node_id) AS num_nodes
     FROM data_bank.regions AS r
     JOIN data_bank.customer_nodes AS c
     ON r.region_id = c.region_id
@@ -47,11 +47,12 @@
 
 | region_name | num_nodes |
 | ----------- | --------- |
-| Africa      | 714       |
-| America     | 735       |
-| Asia        | 665       |
-| Australia   | 770       |
-| Europe      | 616       |
+| Africa      | 5         |
+| America     | 5         |
+| Asia        | 5         |
+| Australia   | 5         |
+| Europe      | 5         |
+
 
 ---
 #### 3. How many customers are allocated to each region?
@@ -75,12 +76,14 @@
 ---
 #### 4. How many days on average are customers reallocated to a different node?
 
-    SELECT ROUND(AVG(end_date - start_date), 1) AS avg_days
-    FROM data_bank.customer_nodes;
+   
+    SELECT ROUND(AVG(end_date - start_date), 0) AS avg_days
+    FROM data_bank.customer_nodes
+    WHERE end_date <> '9999-12-31';
 
 | avg_days |
 | -------- |
-| 416373.4 |
+| 15       |
 
 ---
 #### 5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
@@ -91,6 +94,7 @@
     	FROM data_bank.customer_nodes AS c
       	JOIN data_bank.regions AS r
       	ON c.region_id = r.region_id
+        WHERE end_date <> '9999-12-31'
     	ORDER BY r.region_name,
       		days)
         
@@ -103,11 +107,12 @@
 
 | region_name | median | percentile_80 | percentile_95 |
 | ----------- | ------ | ------------- | ------------- |
-| Africa      | 17.5   | 27            | 2914535.35    |
-| America     | 18     | 27            | 2914534.3     |
-| Asia        | 17     | 27            | 2914538       |
-| Australia   | 17     | 28            | 2914533.55    |
-| Europe      | 18     | 28            | 2914527       |
+| Africa      | 15     | 24            | 28            |
+| America     | 15     | 23            | 28            |
+| Asia        | 15     | 23            | 28            |
+| Australia   | 15     | 23            | 28            |
+| Europe      | 15     | 24            | 28            |
+
 
 ---
 
@@ -133,18 +138,18 @@
     WITH counts AS (
     	SELECT customer_id,
     		COUNT(txn_type) AS total_deposits,
-        	SUM(txn_amount) AS total_amount
+        	AVG(txn_amount) AS total_amount
     	FROM data_bank.customer_transactions
     	WHERE txn_type = 'deposit'
     	GROUP BY customer_id)
     
-    SELECT ROUND(AVG(total_deposits), 1) AS avg_num_deposits,
-    	ROUND(AVG(total_amount), 1) AS avg_amount_per_cust
+    SELECT ROUND(AVG(total_deposits), 0) AS avg_num_deposits,
+    	ROUND(AVG(total_amount), 2) AS avg_amount_per_cust
     FROM counts;
 
 | avg_num_deposits | avg_amount_per_cust |
 | ---------------- | ------------------- |
-| 5.3              | 2718.3              |
+| 5                | 508.61              |
 
 ---
 #### 3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
@@ -188,53 +193,66 @@
     
     , amounts AS (
       SELECT customer_id,
+      	txn_date,
     	eom,
-        SUM(CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END) AS deposit,
-        SUM(CASE WHEN txn_type = 'purchase' THEN txn_amount ELSE 0 END) AS purchase,
-        SUM(CASE WHEN txn_type = 'withdrawal' THEN txn_amount ELSE 0 END) AS withdrawal
+        SUM(CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END) +
+        SUM(CASE WHEN txn_type <> 'deposit' THEN -txn_amount ELSE 0 END) AS purchase
       FROM end_of_month
-      WHERE EXTRACT(month FROM txn_date) = EXTRACT(month FROM eom)
       GROUP BY customer_id,
-    	eom
+    	eom,
+      	txn_date
       ORDER BY customer_id,
     	eom)
     
+    , balance AS (
+      SELECT customer_id,
+      	txn_date,
+      	eom,
+      	purchase,
+      SUM(purchase) OVER(
+        PARTITION BY customer_id
+        ORDER BY txn_date) AS running_balance,
+      RANK() OVER(
+        PARTITION BY customer_id, eom
+        ORDER BY txn_date DESC) AS rank
+      FROM amounts)
+    
     SELECT customer_id,
     	eom,
-        SUM(deposit) - SUM(purchase + withdrawal) AS closing_balance
-    FROM amounts
-    GROUP BY customer_id,
-    	eom
+        running_balance
+    FROM balance
+    WHERE rank = 1
     ORDER BY customer_id,
     	eom
     LIMIT 20;
 
-| customer_id | eom                      | closing_balance |
+| customer_id | eom                      | running_balance |
 | ----------- | ------------------------ | --------------- |
 | 1           | 2020-01-31T00:00:00.000Z | 312             |
-| 1           | 2020-03-31T00:00:00.000Z | -952            |
+| 1           | 2020-03-31T00:00:00.000Z | -640            |
 | 2           | 2020-01-31T00:00:00.000Z | 549             |
-| 2           | 2020-03-31T00:00:00.000Z | 61              |
+| 2           | 2020-03-31T00:00:00.000Z | 610             |
 | 3           | 2020-01-31T00:00:00.000Z | 144             |
-| 3           | 2020-02-29T00:00:00.000Z | -965            |
-| 3           | 2020-03-31T00:00:00.000Z | -401            |
-| 3           | 2020-04-30T00:00:00.000Z | 493             |
+| 3           | 2020-02-29T00:00:00.000Z | -821            |
+| 3           | 2020-03-31T00:00:00.000Z | -1222           |
+| 3           | 2020-04-30T00:00:00.000Z | -729            |
 | 4           | 2020-01-31T00:00:00.000Z | 848             |
-| 4           | 2020-03-31T00:00:00.000Z | -193            |
+| 4           | 2020-03-31T00:00:00.000Z | 655             |
 | 5           | 2020-01-31T00:00:00.000Z | 954             |
-| 5           | 2020-03-31T00:00:00.000Z | -2877           |
-| 5           | 2020-04-30T00:00:00.000Z | -490            |
+| 5           | 2020-03-31T00:00:00.000Z | -1923           |
+| 5           | 2020-04-30T00:00:00.000Z | -2413           |
 | 6           | 2020-01-31T00:00:00.000Z | 733             |
-| 6           | 2020-02-29T00:00:00.000Z | -785            |
-| 6           | 2020-03-31T00:00:00.000Z | 392             |
+| 6           | 2020-02-29T00:00:00.000Z | -52             |
+| 6           | 2020-03-31T00:00:00.000Z | 340             |
 | 7           | 2020-01-31T00:00:00.000Z | 964             |
-| 7           | 2020-02-29T00:00:00.000Z | 2209            |
-| 7           | 2020-03-31T00:00:00.000Z | -640            |
-| 7           | 2020-04-30T00:00:00.000Z | 90              |
+| 7           | 2020-02-29T00:00:00.000Z | 3173            |
+| 7           | 2020-03-31T00:00:00.000Z | 2533            |
+| 7           | 2020-04-30T00:00:00.000Z | 2623            |
 
 ---
 #### 5. What is the percentage of customers who increase their closing balance by more than 5%?
 
+   
     WITH end_of_month AS (
     	SELECT customer_id,
     		txn_date,
@@ -245,54 +263,64 @@
     
     , amounts AS (
       SELECT customer_id,
+      	txn_date,
     	eom,
-        SUM(CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END) AS deposit,
-        SUM(CASE WHEN txn_type = 'purchase' THEN txn_amount ELSE 0 END) AS purchase,
-        SUM(CASE WHEN txn_type = 'withdrawal' THEN txn_amount ELSE 0 END) AS withdrawal
+        SUM(CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END) +
+        SUM(CASE WHEN txn_type <> 'deposit' THEN -txn_amount ELSE 0 END) AS purchase
       FROM end_of_month
-      WHERE EXTRACT(month FROM txn_date) = EXTRACT(month FROM eom)
       GROUP BY customer_id,
-    	eom
+    	eom,
+      	txn_date
       ORDER BY customer_id,
     	eom)
     
-    , closings AS (
+    , balance AS (
+      SELECT customer_id,
+      	txn_date,
+      	eom,
+      	purchase,
+      SUM(purchase) OVER(
+        PARTITION BY customer_id
+        ORDER BY txn_date) AS running_balance,
+      RANK() OVER(
+        PARTITION BY customer_id, eom
+        ORDER BY txn_date DESC) AS rank
+      FROM amounts)
+    
+    , lead_total AS (
       SELECT customer_id,
     	eom,
-        SUM(deposit) - SUM(purchase + withdrawal) AS closing_balance
-      FROM amounts
-      GROUP BY customer_id,
-    	eom
+        running_balance AS starting_balance,
+        (LEAD(running_balance) OVER(
+          PARTITION BY customer_id)) AS ending_balance
+      FROM balance
+      WHERE rank = 1
       ORDER BY customer_id,
     	eom)
         
-    , balances AS (
+    , negative AS (
       SELECT customer_id,
-    	FIRST_VALUE(closing_balance) OVER(
-          PARTITION BY customer_id
-          ORDER BY customer_id) AS starting_balance,
-        LAST_VALUE(closing_balance) OVER(
-          PARTITION BY customer_id
-          ORDER BY customer_id) AS ending_balance
-      FROM closings)
+      	eom,
+      	starting_balance,
+      	ending_balance,
+      	CASE WHEN ending_balance < starting_balance AND starting_balance < 0 THEN -starting_balance ELSE starting_balance END AS divide
+      FROM lead_total
+      WHERE starting_balance <> 0 AND ending_balance IS NOT NULL)
     
     , growth AS (
       SELECT customer_id,
-    	((ending_balance - starting_balance) / starting_balance) AS growth_rate
-      FROM balances
-      WHERE ((ending_balance - starting_balance) / starting_balance) >= 0.05
-      GROUP BY customer_id,
-    	starting_balance,
-    	ending_balance)
-    
-    SELECT ROUND(COUNT(DISTINCT customer_id)::numeric / (
-      SELECT COUNT(DISTINCT customer_id)::numeric
-      FROM closings) * 100, 1) AS percent
+    	((ending_balance - starting_balance) / divide) AS growth_rate
+      FROM negative
+      WHERE ((ending_balance - starting_balance) / divide) > 0.05)
+     
+    SELECT ROUND(COUNT(DISTINCT(customer_id))::numeric / (
+      SELECT COUNT(DISTINCT(customer_id))::numeric
+      FROM data_bank.customer_transactions) * 100, 0) AS percent
     FROM growth;
 
 | percent |
 | ------- |
-| 28.2    |
+| 37      |
 
 ---
 
@@ -321,3 +349,5 @@ Special notes:
 - Data Bank wants an initial calculation which does not allow for compounding interest, however they may also be interested in a daily compounding interest calculation so you can try to perform this calculation if you have the stamina!
 ---
 ## 🚀 Final Thoughts
+
+
