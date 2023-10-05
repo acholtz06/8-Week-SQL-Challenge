@@ -199,3 +199,167 @@
 | Retail   | 1081934227         |
 
 ---
+
+#### 6. What is the percentage of sales for Retail vs Shopify for each month?
+
+    WITH total_sales AS (
+    	SELECT DATE_TRUNC('month', week_date) AS month,
+    		SUM(sales) AS total_sales
+    	FROM clean_weekly_sales
+    	GROUP BY month
+    	ORDER BY month)
+    
+    , platform_sales AS (
+    	SELECT DATE_TRUNC('month', week_date) AS month,
+    		platform,
+        	SUM(c.sales) AS platform_sales
+    	FROM clean_weekly_sales AS c
+    	GROUP BY month,
+    		platform
+        ORDER BY month,
+    		platform)
+    
+    SELECT CONCAT(TO_CHAR(TO_DATE((EXTRACT(month FROM t.month))::VARCHAR, 'MM'), 'Month'), ' ', 
+                  EXTRACT(year FROM t.month)) AS month,
+    	p.platform,
+        ROUND((p.platform_sales::numeric / t.total_sales::numeric) * 100, 2) AS percent_of_sales
+    FROM total_sales AS t
+    JOIN platform_sales AS p
+    ON t.month = p.month;
+
+| month          | platform | percent_of_sales |
+| -------------- | -------- | ---------------- |
+| March     2018 | Retail   | 97.92            |
+| March     2018 | Shopify  | 2.08             |
+| April     2018 | Retail   | 97.93            |
+| April     2018 | Shopify  | 2.07             |
+| May       2018 | Retail   | 97.73            |
+| May       2018 | Shopify  | 2.27             |
+| June      2018 | Retail   | 97.76            |
+| June      2018 | Shopify  | 2.24             |
+| July      2018 | Retail   | 97.75            |
+| July      2018 | Shopify  | 2.25             |
+| August    2018 | Retail   | 97.71            |
+| August    2018 | Shopify  | 2.29             |
+| September 2018 | Retail   | 97.68            |
+| September 2018 | Shopify  | 2.32             |
+| March     2019 | Retail   | 97.71            |
+| March     2019 | Shopify  | 2.29             |
+| April     2019 | Retail   | 97.80            |
+| April     2019 | Shopify  | 2.20             |
+| May       2019 | Retail   | 97.52            |
+| May       2019 | Shopify  | 2.48             |
+| June      2019 | Retail   | 97.42            |
+| June      2019 | Shopify  | 2.58             |
+| July      2019 | Retail   | 97.35            |
+| July      2019 | Shopify  | 2.65             |
+| August    2019 | Retail   | 97.21            |
+| August    2019 | Shopify  | 2.79             |
+| September 2019 | Retail   | 97.09            |
+| September 2019 | Shopify  | 2.91             |
+| March     2020 | Retail   | 97.30            |
+| March     2020 | Shopify  | 2.70             |
+| April     2020 | Retail   | 96.96            |
+| April     2020 | Shopify  | 3.04             |
+| May       2020 | Retail   | 96.71            |
+| May       2020 | Shopify  | 3.29             |
+| June      2020 | Retail   | 96.80            |
+| June      2020 | Shopify  | 3.20             |
+| July      2020 | Retail   | 96.67            |
+| July      2020 | Shopify  | 3.33             |
+| August    2020 | Retail   | 96.51            |
+| August    2020 | Shopify  | 3.49             |
+
+---
+#### 7. What is the percentage of sales by demographic for each year in the dataset?
+
+    WITH total_sales AS (
+      SELECT calendar_year,
+      	SUM(sales) AS total_sales
+      FROM clean_weekly_sales
+      GROUP BY calendar_year
+      ORDER BY calendar_year)
+     
+    
+    , dem_sales AS (
+      SELECT calendar_year,
+      	demographic,
+      	SUM(sales) AS demographic_sales
+      FROM clean_weekly_sales
+      GROUP BY calendar_year,
+      	demographic
+      ORDER BY calendar_year,
+      	demographic)
+    
+    SELECT t.calendar_year,
+    	SUM(CASE WHEN d.demographic = 'Couples' 
+        	THEN ROUND((d.demographic_sales::numeric / t.total_sales::numeric) * 100, 2) END) AS couples_sales,
+        SUM(CASE WHEN d.demographic = 'Families'
+            THEN ROUND((d.demographic_sales::numeric / t.total_sales::numeric) * 100, 2) END) AS families_sales,
+        SUM(CASE WHEN d.demographic = 'Unknown'
+            THEN ROUND((d.demographic_sales::numeric / t.total_sales::numeric) * 100, 2) END) AS unknown_sales
+    FROM total_sales AS t
+    JOIN dem_sales AS d
+    ON t.calendar_year = d.calendar_year
+    GROUP BY t.calendar_year;
+
+| calendar_year | couples_sales | families_sales | unknown_sales |
+| ------------- | ------------- | -------------- | ------------- |
+| 2018          | 26.38         | 31.99          | 41.63         |
+| 2019          | 27.28         | 32.47          | 40.25         |
+| 2020          | 28.72         | 32.73          | 38.55         |
+
+---
+
+#### 8. Which age_band and demographic values contribute the most to Retail sales?
+
+    SELECT age_band,
+    	SUM(sales) AS age_band_sales
+    FROM clean_weekly_sales
+    WHERE age_band <> 'Unknown' AND 
+    	platform = 'Retail'
+    GROUP BY age_band
+    ORDER BY age_band_sales DESC
+    LIMIT 1;
+
+| age_band | age_band_sales |
+| -------- | -------------- |
+| Retirees | 13005266930    |
+
+
+    SELECT demographic,
+    	SUM(sales) AS dem_sales
+    FROM clean_weekly_sales
+    WHERE demographic <> 'Unknown' AND
+    	platform = 'Retail'
+    GROUP BY demographic
+    ORDER BY dem_sales DESC
+    LIMIT 1;
+
+| demographic | dem_sales   |
+| ----------- | ----------- |
+| Families    | 12759667763 |
+
+---
+#### 9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?
+
+    SELECT calendar_year,
+    	platform,
+        ROUND(AVG(avg_transaction), 2) AS wrong_avg,
+    	ROUND((SUM(sales)::numeric / SUM(transactions)::numeric), 2) AS correct_avg_txn
+    FROM clean_weekly_sales
+    GROUP BY calendar_year,
+    	platform
+    ORDER BY calendar_year,
+    	platform;
+
+| calendar_year | platform | wrong_avg | correct_avg_txn |
+| ------------- | -------- | --------- | --------------- |
+| 2018          | Retail   | 42.41     | 36.56           |
+| 2018          | Shopify  | 187.80    | 192.48          |
+| 2019          | Retail   | 41.47     | 36.83           |
+| 2019          | Shopify  | 177.07    | 183.36          |
+| 2020          | Retail   | 40.14     | 36.56           |
+| 2020          | Shopify  | 174.40    | 179.03          |
+
+---
