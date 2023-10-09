@@ -522,4 +522,195 @@ Using this analysis approach - answer the following questions:
 
 ---
 
+---
+**Query #2**
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 12)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 12)
+      
+    , totals AS (
+      SELECT region,
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS twelve_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY region)
+      
+    SELECT region,
+    	ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals
+    ORDER BY growth_rate;
+
+| region        | growth_rate |
+| ------------- | ----------- |
+| Asia          | -3.26       |
+| Oceania       | -3.03       |
+| South America | -2.15       |
+| Canada        | -1.92       |
+| USA           | -1.60       |
+| Africa        | -0.54       |
+| Europe        | 4.73        |
+
+---
+**Query #3**
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 12)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 12)
+      
+    , totals AS (
+      SELECT platform,
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS twelve_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY platform)
+      
+    SELECT platform,
+    	ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals
+    ORDER BY growth_rate;
+
+| platform | growth_rate |
+| -------- | ----------- |
+| Retail   | -2.43       |
+| Shopify  | 7.18        |
+
+---
+**Query #4**
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 12)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 12)
+      
+    , totals AS (
+      SELECT age_band,
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS twelve_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY age_band)
+      
+    SELECT age_band,
+    	ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals
+    ORDER BY growth_rate;
+
+| age_band     | growth_rate |
+| ------------ | ----------- |
+| Unknown      | -3.34       |
+| Middle Aged  | -1.97       |
+| Retirees     | -1.23       |
+| Young Adults | -0.92       |
+
+---
+**Query #5**
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 12)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 12)
+      
+    , totals AS (
+      SELECT demographic,
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS twelve_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY demographic)
+      
+    SELECT demographic,
+    	ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals
+    ORDER BY growth_rate;
+
+| demographic | growth_rate |
+| ----------- | ----------- |
+| Unknown     | -3.34       |
+| Families    | -1.82       |
+| Couples     | -0.87       |
+
+---
+**Query #6**
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 12)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 12)
+      
+    , totals AS (
+      SELECT customer_type,
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS twelve_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY customer_type)
+      
+    SELECT customer_type,
+    	ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals
+    ORDER BY growth_rate;
+
+| customer_type | growth_rate |
+| ------------- | ----------- |
+| Guest         | -3.00       |
+| Existing      | -2.27       |
+| New           | 1.01        |
+
+---
+
 
