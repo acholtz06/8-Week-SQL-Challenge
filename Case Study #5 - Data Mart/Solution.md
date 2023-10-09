@@ -363,3 +363,163 @@
 | 2020          | Shopify  | 174.40    | 179.03          |
 
 ---
+
+### C. Before & After Analysis
+
+This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.  
+  
+Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.  
+  
+We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before  
+  
+Using this analysis approach - answer the following questions:
+
+#### 1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
+
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 4)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 4)
+      
+    , totals AS (
+      SELECT 
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS four_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS four_weeks_after
+      FROM clean_weekly_sales)
+      
+    SELECT ROUND((four_weeks_after::numeric - four_weeks_before::numeric) / four_weeks_before::numeric * 100, 2) AS reduction_rate
+    FROM totals;
+
+| reduction_rate |
+| -------------- |
+| -1.15          |
+
+---
+
+#### 2. What about the entire 12 weeks before and after?
+
+    WITH before AS (
+    	SELECT DISTINCT(week_date)
+    	FROM clean_weekly_sales
+    	WHERE week_date < '2020-06-15'
+    	ORDER BY week_date DESC
+    	LIMIT 12)
+    
+    , after AS (
+      SELECT DISTINCT(week_date)
+      FROM clean_weekly_sales
+      WHERE week_date >= '2020-6-15'
+      ORDER BY week_date
+      LIMIT 12)
+      
+    , totals AS (
+      SELECT 
+    	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+        	THEN sales END) AS twelve_weeks_before,
+        SUM(CASE WHEN week_date IN (SELECT * FROM after)
+        	THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales)
+      
+    SELECT ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS reduction_rate
+    FROM totals;
+
+| reduction_rate |
+| -------------- |
+| -2.14          |
+
+---
+
+#### 3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+
+    WITH week_num AS (
+      SELECT DISTINCT(week_number)
+      FROM clean_weekly_sales
+      WHERE week_date = '2020-06-15')
+      
+    , before AS (
+      SELECT DISTINCT week_date
+      FROM clean_weekly_sales
+      WHERE week_number BETWEEN (SELECT week_number FROM week_num) - 4 AND (SELECT week_number FROM week_num) - 1)
+    
+    , after AS (
+      SELECT DISTINCT week_date
+      FROM clean_weekly_sales
+      WHERE week_number BETWEEN (SELECT week_number FROM week_num) AND (SELECT week_number FROM week_num) + 3)
+        
+    , totals AS (
+      SELECT calendar_year,
+      	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+      		THEN sales END) AS four_weeks_before,
+      	SUM(CASE WHEN week_date IN (SELECT * FROM after)
+      		THEN sales END) AS four_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY calendar_year
+      ORDER BY calendar_year)
+    
+    SELECT calendar_year,
+    	four_weeks_before,
+        four_weeks_after,
+    	ROUND((four_weeks_after::numeric - four_weeks_before::numeric) / four_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals;
+
+| calendar_year | four_weeks_before | four_weeks_after | growth_rate |
+| ------------- | ----------------- | ---------------- | ----------- |
+| 2018          | 2119669585        | 2115732898       | -0.19       |
+| 2019          | 2249989796        | 2252326390       | 0.10        |
+| 2020          | 2345878357        | 2318994169       | -1.15       |
+
+---
+**Query #3**
+
+    WITH week_num AS (
+      SELECT DISTINCT(week_number)
+      FROM clean_weekly_sales
+      WHERE week_date = '2020-06-15')
+      
+    , before AS (
+      SELECT DISTINCT week_date
+      FROM clean_weekly_sales
+      WHERE week_number BETWEEN (SELECT week_number FROM week_num) - 12 AND (SELECT week_number FROM week_num) - 1)
+    
+    , after AS (
+      SELECT DISTINCT week_date
+      FROM clean_weekly_sales
+      WHERE week_number BETWEEN (SELECT week_number FROM week_num) AND (SELECT week_number FROM week_num) + 11)
+        
+    , totals AS (
+      SELECT calendar_year,
+      	SUM(CASE WHEN week_date IN (SELECT * FROM before)
+      		THEN sales END) AS twelve_weeks_before,
+      	SUM(CASE WHEN week_date IN (SELECT * FROM after)
+      		THEN sales END) AS twelve_weeks_after
+      FROM clean_weekly_sales
+      GROUP BY calendar_year
+      ORDER BY calendar_year)
+    
+    SELECT calendar_year,
+    	twelve_weeks_before,
+        twelve_weeks_after,
+    	ROUND((twelve_weeks_after::numeric - twelve_weeks_before::numeric) / twelve_weeks_before::numeric * 100, 2) AS growth_rate
+    FROM totals;
+
+| calendar_year | twelve_weeks_before | twelve_weeks_after | growth_rate |
+| ------------- | ------------------- | ------------------ | ----------- |
+| 2018          | 5863302538          | 6481106927         | 10.54       |
+| 2019          | 6883386397          | 6862646103         | -0.30       |
+| 2020          | 7126273147          | 6973947753         | -2.14       |
+
+---
+
+
