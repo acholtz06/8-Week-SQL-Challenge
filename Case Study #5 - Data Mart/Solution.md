@@ -521,8 +521,7 @@ Using this analysis approach - answer the following questions:
 | 2020          | 7126273147          | 6973947753         | -2.14       |
 
 ---
-
----
+### D. Bonus Question
 **Query #2**
 
     WITH before AS (
