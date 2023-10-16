@@ -307,6 +307,34 @@ Insighs:
 | ------------------- | ------------------------- |
 | 92                  | 9                         |
 
+Steps:
+- CTE #1
+    - Filtered out any plans from the subscriptions table that weren't either trial or churn
+- CTE #2
+    - Selected the customer_id and counted the plan_ids
+    - Grouped by the customer_id
+    - Filtered for only customers that had a count of 2, meaning that they had both a trial plan and churn
+- CTE #3
+    - Joined the plans and counts CTEs on customer_id
+    - Selected the customer_id, plan_id, and start_date
+    - The results of this CTE showed each customer, their trial start date, and their churn date
+- CTE #4
+    - Selected everything from the previous CTE
+    - Used the LAG function to create a new column that diplayed the dates in the previous column by 1, and with 7 days added. What this did is showed when the free trial ended, and put that date in the same record as the actual churn date
+- CTE #5
+    - Here is where I could look at each record and see if the end date of the free trial matched the churn date. Any dates that matched meant that the customer churned immediately after their free trial
+    - I counted the customer_ids
+    - Filtered for only ids where the start_date = churn_date
+- Final Query
+    - Selected the number of customers who churned right after the trial
+    - Cast the number of customers who churned after the trial as numeric and divided that number by 1000. I used 1000 becuase I know that to be the total number of customers based on previous queries
+    - Multiplied that number by 100 to show the percentage
+    - Rounded to the nearest whole number
+
+Insights:
+- 92 customers cancelled their subscriptions immediately after their free trial period
+- That comes to 9% of total customers
+
 ---
 #### 6. What is the number and percentage of customer plans after their initial free trial?
 
