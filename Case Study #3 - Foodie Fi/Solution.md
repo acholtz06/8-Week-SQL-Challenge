@@ -320,7 +320,8 @@ Steps:
     - The results of this CTE showed each customer, their trial start date, and their churn date
 - CTE #4
     - Selected everything from the previous CTE
-    - Used the LAG function to create a new column that diplayed the dates in the previous column by 1, and with 7 days added. What this did is showed when the free trial ended, and put that date in the same record as the actual churn date
+    - Used the LAG function to create a new column that diplayed the dates in the previous column lagged by 1, and with 7 days added. What this did is showed when the free trial ended, and put that date in the same record as the actual churn date
+    - Partitioned the lag by the customer_id so no dates overlapped and ordered by the plan_id to make sure that the trial plan + 7 was always lagged next to churn
 - CTE #5
     - Here is where I could look at each record and see if the end date of the free trial matched the churn date. Any dates that matched meant that the customer churned immediately after their free trial
     - I counted the customer_ids
