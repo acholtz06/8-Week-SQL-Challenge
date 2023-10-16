@@ -30,6 +30,73 @@ Based off the 8 sample customers provided in the sample from the subscriptions t
 
 Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
 
+---
+
+    SELECT s.customer_id,
+    	p.plan_name,
+        s.start_date
+    FROM foodie_fi.subscriptions AS s
+    JOIN foodie_fi.plans AS p
+    ON s.plan_id = p.plan_id
+    WHERE s.customer_id = 1;
+
+| customer_id | plan_name     | start_date               |
+| ----------- | ------------- | ------------------------ |
+| 1           | trial         | 2020-08-01T00:00:00.000Z |
+| 1           | basic monthly | 2020-08-08T00:00:00.000Z |
+
+
+
+| customer_id | plan_name  | start_date               |
+| ----------- | ---------- | ------------------------ |
+| 2           | trial      | 2020-09-20T00:00:00.000Z |
+| 2           | pro annual | 2020-09-27T00:00:00.000Z |
+
+
+
+| customer_id | plan_name | start_date               |
+| ----------- | --------- | ------------------------ |
+| 11          | trial     | 2020-11-19T00:00:00.000Z |
+| 11          | churn     | 2020-11-26T00:00:00.000Z |
+
+
+| customer_id | plan_name     | start_date               |
+| ----------- | ------------- | ------------------------ |
+| 13          | trial         | 2020-12-15T00:00:00.000Z |
+| 13          | basic monthly | 2020-12-22T00:00:00.000Z |
+| 13          | pro monthly   | 2021-03-29T00:00:00.000Z |
+
+
+
+| customer_id | plan_name   | start_date               |
+| ----------- | ----------- | ------------------------ |
+| 15          | trial       | 2020-03-17T00:00:00.000Z |
+| 15          | pro monthly | 2020-03-24T00:00:00.000Z |
+| 15          | churn       | 2020-04-29T00:00:00.000Z |
+
+
+
+| customer_id | plan_name     | start_date               |
+| ----------- | ------------- | ------------------------ |
+| 16          | trial         | 2020-05-31T00:00:00.000Z |
+| 16          | basic monthly | 2020-06-07T00:00:00.000Z |
+| 16          | pro annual    | 2020-10-21T00:00:00.000Z |
+
+
+| customer_id | plan_name   | start_date               |
+| ----------- | ----------- | ------------------------ |
+| 18          | trial       | 2020-07-06T00:00:00.000Z |
+| 18          | pro monthly | 2020-07-13T00:00:00.000Z |
+
+
+| customer_id | plan_name   | start_date               |
+| ----------- | ----------- | ------------------------ |
+| 19          | trial       | 2020-06-22T00:00:00.000Z |
+| 19          | pro monthly | 2020-06-29T00:00:00.000Z |
+| 19          | pro annual  | 2020-08-29T00:00:00.000Z |
+
+---
+
 ### 📺 B. Data Analysis Questions
 #### 1. How many customers has Foodie-Fi ever had?
 
@@ -68,120 +135,28 @@ Try to keep it as short as possible - you may also want to run some sort of join
 ---
 #### 3. What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
 
+    **Query #1**
+
     SELECT DATE_TRUNC('month', start_date) AS month,
-    	COUNT(plan_id) AS basic_monthly
+    	SUM(CASE WHEN plan_id = 0 THEN 1 ELSE 0 END) AS trial,
+    	SUM(CASE WHEN plan_id = 1 THEN 1 ELSE 0 END) AS basic_monthly,
+        SUM(CASE WHEN plan_id = 2 THEN 1 ELSE 0 END) AS pro_monthly,
+        SUM(CASE WHEN plan_id = 3 THEN 1 ELSE 0 END) AS pro_annual,
+        SUM(CASE WHEN plan_id = 4 THEN 1 ELSE 0 END) AS churn
     FROM foodie_fi.subscriptions
-    WHERE plan_id = 1
+    WHERE EXTRACT(year FROM start_date) > '2020'
     GROUP BY DATE_TRUNC('month', start_date)
     ORDER BY month;
 
-| month                    | basic_monthly |
-| ------------------------ | ------------- |
-| 2020-01-01T00:00:00.000Z | 31            |
-| 2020-02-01T00:00:00.000Z | 37            |
-| 2020-03-01T00:00:00.000Z | 49            |
-| 2020-04-01T00:00:00.000Z | 43            |
-| 2020-05-01T00:00:00.000Z | 53            |
-| 2020-06-01T00:00:00.000Z | 51            |
-| 2020-07-01T00:00:00.000Z | 44            |
-| 2020-08-01T00:00:00.000Z | 54            |
-| 2020-09-01T00:00:00.000Z | 38            |
-| 2020-10-01T00:00:00.000Z | 46            |
-| 2020-11-01T00:00:00.000Z | 49            |
-| 2020-12-01T00:00:00.000Z | 43            |
-| 2021-01-01T00:00:00.000Z | 8             |
-
-
-    SELECT DATE_TRUNC('month', start_date) AS month,
-    	COUNT(plan_id) AS pro_monthly
-    FROM foodie_fi.subscriptions
-    WHERE plan_id = 2
-    GROUP BY DATE_TRUNC('month', start_date)
-    ORDER BY month;
-
-| month                    | pro_monthly |
-| ------------------------ | ----------- |
-| 2020-01-01T00:00:00.000Z | 29          |
-| 2020-02-01T00:00:00.000Z | 29          |
-| 2020-03-01T00:00:00.000Z | 37          |
-| 2020-04-01T00:00:00.000Z | 31          |
-| 2020-05-01T00:00:00.000Z | 39          |
-| 2020-06-01T00:00:00.000Z | 39          |
-| 2020-07-01T00:00:00.000Z | 40          |
-| 2020-08-01T00:00:00.000Z | 56          |
-| 2020-09-01T00:00:00.000Z | 52          |
-| 2020-10-01T00:00:00.000Z | 47          |
-| 2020-11-01T00:00:00.000Z | 32          |
-| 2020-12-01T00:00:00.000Z | 48          |
-| 2021-01-01T00:00:00.000Z | 26          |
-| 2021-02-01T00:00:00.000Z | 12          |
-| 2021-03-01T00:00:00.000Z | 15          |
-| 2021-04-01T00:00:00.000Z | 7           |
-
-
-    SELECT DATE_TRUNC('month', start_date) AS month,
-    	COUNT(plan_id) AS pro_annual
-    FROM foodie_fi.subscriptions
-    WHERE plan_id = 3
-    GROUP BY DATE_TRUNC('month', start_date)
-    ORDER BY month;
-
-| month                    | pro_annual |
-| ------------------------ | ---------- |
-| 2020-01-01T00:00:00.000Z | 2          |
-| 2020-02-01T00:00:00.000Z | 5          |
-| 2020-03-01T00:00:00.000Z | 7          |
-| 2020-04-01T00:00:00.000Z | 11         |
-| 2020-05-01T00:00:00.000Z | 13         |
-| 2020-06-01T00:00:00.000Z | 16         |
-| 2020-07-01T00:00:00.000Z | 20         |
-| 2020-08-01T00:00:00.000Z | 24         |
-| 2020-09-01T00:00:00.000Z | 25         |
-| 2020-10-01T00:00:00.000Z | 32         |
-| 2020-11-01T00:00:00.000Z | 20         |
-| 2020-12-01T00:00:00.000Z | 20         |
-| 2021-01-01T00:00:00.000Z | 24         |
-| 2021-02-01T00:00:00.000Z | 17         |
-| 2021-03-01T00:00:00.000Z | 9          |
-| 2021-04-01T00:00:00.000Z | 13         |
-
-
-    SELECT DATE_TRUNC('month', start_date) AS month,
-    	COUNT(plan_id) AS churn
-    FROM foodie_fi.subscriptions
-    WHERE plan_id = 4
-    GROUP BY DATE_TRUNC('month', start_date)
-    ORDER BY month;
-
-| month                    | churn |
-| ------------------------ | ----- |
-| 2020-01-01T00:00:00.000Z | 9     |
-| 2020-02-01T00:00:00.000Z | 9     |
-| 2020-03-01T00:00:00.000Z | 13    |
-| 2020-04-01T00:00:00.000Z | 18    |
-| 2020-05-01T00:00:00.000Z | 21    |
-| 2020-06-01T00:00:00.000Z | 19    |
-| 2020-07-01T00:00:00.000Z | 28    |
-| 2020-08-01T00:00:00.000Z | 13    |
-| 2020-09-01T00:00:00.000Z | 23    |
-| 2020-10-01T00:00:00.000Z | 26    |
-| 2020-11-01T00:00:00.000Z | 32    |
-| 2020-12-01T00:00:00.000Z | 25    |
-| 2021-01-01T00:00:00.000Z | 19    |
-| 2021-02-01T00:00:00.000Z | 18    |
-| 2021-03-01T00:00:00.000Z | 21    |
-| 2021-04-01T00:00:00.000Z | 13    |
+| month                    | trial | basic_monthly | pro_monthly | pro_annual | churn |
+| ------------------------ | ----- | ------------- | ----------- | ---------- | ----- |
+| 2021-01-01T00:00:00.000Z | 0     | 8             | 26          | 24         | 19    |
+| 2021-02-01T00:00:00.000Z | 0     | 0             | 12          | 17         | 18    |
+| 2021-03-01T00:00:00.000Z | 0     | 0             | 15          | 9          | 21    |
+| 2021-04-01T00:00:00.000Z | 0     | 0             | 7           | 13         | 13    |
 
 ---
 #### 4. What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
-
-    SELECT COUNT(customer_id) AS num_churn
-    		FROM foodie_fi.subscriptions
-    		WHERE plan_id = 4;
-
-| num_churn |
-| --------- |
-| 307       |
 
 
     WITH churn AS (
@@ -190,16 +165,16 @@ Try to keep it as short as possible - you may also want to run some sort of join
           	    SELECT COUNT(customer_id)
     		    FROM foodie_fi.subscriptions
     		    WHERE plan_id = 4
-        	) AS churn
+        	) AS num_churn
     	FROM foodie_fi.subscriptions)
     
-    SELECT ROUND((churn::numeric / customers::numeric) * 100, 1) AS churn_percent
+    SELECT num_churn,
+    	ROUND((num_churn::numeric / customers::numeric) * 100, 1) AS churn_percent
     FROM churn;
 
-| churn_percent |
-| ------------- |
-| 30.7          |
-
+| num_churn | churn_percent |
+| --------- | ------------- |
+| 307       | 30.7          |
 
 ---
 #### 5. How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
