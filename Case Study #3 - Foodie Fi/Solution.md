@@ -147,6 +147,12 @@ Steps:
 | --------------- |
 | 1000            |
 
+Steps:
+- Counted the distinct customer_ids from the subscriptions table
+
+Insights:
+- There have been 1000 total customers
+
 ---
 #### 2. What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
 
@@ -172,10 +178,21 @@ Steps:
 | 2020-11-01T00:00:00.000Z | 75         |
 | 2020-12-01T00:00:00.000Z | 84         |
 
+Steps:
+- Used DATE_TRUNC for the start_dates to have all dates start on the first of the month
+- Counted the plan_ids
+- Filtered for only trial plans
+- Grouped by the truncated dates
+- Ordered by month
+
+Insights:
+- The second month had the lowest number of new trial members
+- The third month had the highest number of new trial members
+- The number of new trial members per month doesn't vary too much
+- The only outliers that stand out are the second and third months
+
 ---
 #### 3. What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
-
-    **Query #1**
 
     SELECT DATE_TRUNC('month', start_date) AS month,
     	SUM(CASE WHEN plan_id = 0 THEN 1 ELSE 0 END) AS trial,
@@ -194,6 +211,18 @@ Steps:
 | 2021-02-01T00:00:00.000Z | 0     | 0             | 12          | 17         | 18    |
 | 2021-03-01T00:00:00.000Z | 0     | 0             | 15          | 9          | 21    |
 | 2021-04-01T00:00:00.000Z | 0     | 0             | 7           | 13         | 13    |
+
+Steps:
+- Used DATE_TRUNC for the start_dates to have all dates start on the first of the month
+- Used CASE statements for each of the plans where the plan = 1 if it matched the plan I was counting, and 0 if it didin't
+- Filtered for only dates after the year 2020
+- Grouped by the truncated month
+
+Insights:
+- No new trial customers started after 2020
+- After the 8 upgrades in January, no one else upgraded to the basic monthly plan
+- Most pro monthly and pro annual upgrades happened in January
+- The most churned accounts happened in March
 
 ---
 #### 4. What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
@@ -215,6 +244,19 @@ Steps:
 | num_churn | churn_percent |
 | --------- | ------------- |
 | 307       | 30.7          |
+
+Steps:
+- Created a CTE called churn
+- Counted the distinct customer_ids to get the total number of customers
+- Used a subquery to count the customer_ids that had a plan_id of 4 (or churn)
+- Used the CTE to select the number of customers that churned
+- Divided the number of churned customers by the total number of customers and cast both of those numbers as the numeric data type
+- Multiplied by 100 to show the percentage
+- Rounded that answer to 1 decimal place
+
+Insighs:
+- 307 out of 1000 customer accounts churned
+- 30.7% of the total customers churned
 
 ---
 #### 5. How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
