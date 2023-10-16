@@ -16,10 +16,22 @@
 
 ## ✏️ Business Task
 
+Danny has created a new subscription service that streams only food related content - like Netflix for cooking and food shows from around the world. He started the service in 2020 and has a few options for monthly and annual subscriptions.  
+
+The data that is provided will help Danny to make data driven descisions about future investments or new features that can be added.
+
 ## ⚠️ Data Limitations
+
+This has been the case study with the least limitations out of the ones that I have done so far. There are plenty of customers to analyze and the time period spans more than a year, which is great for spotting trends in the data.  
+
+The one thing that I feel could have been included to provide more insight is a customer survey asking why they decided to upgrade or drop the service. Since this wasn't included in the beginning, we can look at trends in the data we have and further investigate by sending out surveys to see why these trends are happening.
 
 ## 🔪 Data
 
+There are two tables provided:
+- plans
+- subscriptions
+  
 ![Foodie-Fi Data](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/dad8a118-fb61-4b26-9296-b4ea353e96aa)
 
 
@@ -40,11 +52,20 @@ Try to keep it as short as possible - you may also want to run some sort of join
     ON s.plan_id = p.plan_id
     WHERE s.customer_id = 1;
 
+Steps:
+- Joined the subscriptions and the plans tables so that I could use the plan_name instead of the plan_id
+- Selected the customer_id, plan_name, and start_date
+- Filtered for one customer in the sample subscriptions table (provided on the Data With Danny page linked above)
+- Changed the filter for each customer in the sample table
+
+
 | customer_id | plan_name     | start_date               |
 | ----------- | ------------- | ------------------------ |
 | 1           | trial         | 2020-08-01T00:00:00.000Z |
 | 1           | basic monthly | 2020-08-08T00:00:00.000Z |
 
+- Customer 1 started their free trial on 2020-08-01
+- After the 1 week free trial, they upgraded to the basic monthly plan
 
 
 | customer_id | plan_name  | start_date               |
@@ -52,12 +73,17 @@ Try to keep it as short as possible - you may also want to run some sort of join
 | 2           | trial      | 2020-09-20T00:00:00.000Z |
 | 2           | pro annual | 2020-09-27T00:00:00.000Z |
 
+- Customer 2 started their free trial on 2020-09-20
+- After the 1 week free trial, they upgraded to the pro annual plan
 
 
 | customer_id | plan_name | start_date               |
 | ----------- | --------- | ------------------------ |
 | 11          | trial     | 2020-11-19T00:00:00.000Z |
 | 11          | churn     | 2020-11-26T00:00:00.000Z |
+
+- Customer 11 started their free trial on 2020-11-19
+- After the 1 week free trial, they cancelled their supscription
 
 
 | customer_id | plan_name     | start_date               |
@@ -66,6 +92,9 @@ Try to keep it as short as possible - you may also want to run some sort of join
 | 13          | basic monthly | 2020-12-22T00:00:00.000Z |
 | 13          | pro monthly   | 2021-03-29T00:00:00.000Z |
 
+- Customer 13 started their free trial on 2020-12-15
+- After their 1 week free trial, they upgraded to the basic monthly plan
+- Three months later, they upgraded to the pro monthly plan
 
 
 | customer_id | plan_name   | start_date               |
@@ -74,7 +103,9 @@ Try to keep it as short as possible - you may also want to run some sort of join
 | 15          | pro monthly | 2020-03-24T00:00:00.000Z |
 | 15          | churn       | 2020-04-29T00:00:00.000Z |
 
-
+- Customer 15 started their free trial on 2020-03-17
+- After their 1 week free trial, they upgraded to the pro monthly plan
+- One month later, they cancelled their subscription
 
 | customer_id | plan_name     | start_date               |
 | ----------- | ------------- | ------------------------ |
@@ -82,12 +113,18 @@ Try to keep it as short as possible - you may also want to run some sort of join
 | 16          | basic monthly | 2020-06-07T00:00:00.000Z |
 | 16          | pro annual    | 2020-10-21T00:00:00.000Z |
 
+- Customer 16 started their free trial on 2020-05-31
+- After their 1 week free trial, they upgraded to the basic monthly plan
+- Four monthls later, they upgraded to the pro annual plan
+
 
 | customer_id | plan_name   | start_date               |
 | ----------- | ----------- | ------------------------ |
 | 18          | trial       | 2020-07-06T00:00:00.000Z |
 | 18          | pro monthly | 2020-07-13T00:00:00.000Z |
 
+- Customer 18 started their free trial on 2020-07-06
+- After their 1 week free trial, they upgraded to the pro monthly plan
 
 | customer_id | plan_name   | start_date               |
 | ----------- | ----------- | ------------------------ |
@@ -95,6 +132,9 @@ Try to keep it as short as possible - you may also want to run some sort of join
 | 19          | pro monthly | 2020-06-29T00:00:00.000Z |
 | 19          | pro annual  | 2020-08-29T00:00:00.000Z |
 
+- Customer 19 started their free trial on 2020-06-22
+- After their 1 week free trial, they upgraded to the pro monthly plan
+- Two months later, they upgraded to the pro annual plan
 ---
 
 ### 📺 B. Data Analysis Questions
