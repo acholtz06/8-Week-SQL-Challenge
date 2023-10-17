@@ -801,5 +801,21 @@ Steps:
 - Again, used the growth rate formula to find a 998.97% increase in profit from the beginning of 2020 to the end of 2020
 ---
 
+#### 2. What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
+
+---
+
+#### 3. What are some key customer journeys or experiences that you would analyse further to improve customer retention?
+
+---
+
+#### 4. If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
+
+---
+
+#### 5. What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
+
+---
+
 ## 🚀 Final Thoughts
 
