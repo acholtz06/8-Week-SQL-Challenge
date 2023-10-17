@@ -366,6 +366,22 @@ Insights:
 | pro annual    | 37          | 4               |
 | churn         | 92          | 9               |
 
+Steps:
+- Created a CTE called ranks
+- Used RANK to number the plans
+- Partitioned by the customer_id so each customer started at rank 1
+- Ordered by the start date so that the plans each customer had were listed in the order that they signed up for them
+- Joined the CTE to the plans table to get the plan names
+- Counted the plan_ids
+- Took the count of the plan_id cast as the numeric data type and divided by the total number of customer_id. I then multiplied that number by 100 to get the percentage. Finally, I rounded the percentage to the whole number
+- Filtered for plans with the rank of 2. I did this because every customer starts with the free trial, which would be rank 1 for every customer. By selecting the rank of 2, I was able to see which plan came immediately after the free trial.
+- Grouped by the plan_name and the plan_id
+
+Insights:
+- Over half of customers go straight to the basic monthly plan after the free trial
+- A third of customers upgrade to the pro monthly plan after the free trial
+- More customers churn after the free trial than upgrade to the pro annual subscription
+
 ---
 #### 7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
 
@@ -399,6 +415,22 @@ Insights:
 | pro annual    | 195         | 20              |
 | churn         | 236         | 24              |
 
+Steps:
+- Created a CTE called date to find which plan each customer was subscribed to at the end of 2020
+- Found the MAX (or most current) start date
+- Filtered for start dates that we on or before 2020-12-31
+- Grouped by customer_id
+- Joined the CTE to the subscriptions table. I made sure to use an inner join and join on the current_plan from the CTE = the start_date so that those were the only date included
+- Joined the plans table to get the plan_names
+- Counted the plan_ids to get the total number of customers in each plan
+- Took the count of the customers in each plan cast as the numeric data type and divided that by the total number of customers. I multiplied that number by 100 to get the percentage and rounded to the whole number
+- Grouped by the plan_name and plan_id
+
+Insights:
+- At the end of 2020, the most popular plan was the pro monthly, with 33% of members subscribed
+- The least popular plan is the pro annual, with 20% of members subscribed
+- 2% of customers were new and in their 1 week free trial at the end of 2020
+  
 ---
 #### 8. How many customers have upgraded to an annual plan in 2020?
 
@@ -413,8 +445,13 @@ Insights:
 | ------------ |
 | 195          |
 
+Steps:
+- Selected the count of distinct customer_ids
+- Filtered for only plan_id = 3 (pro annual)
+- I used a subquery in the WHERE clause to filter for start_dates in 2020
+  
 ---
-#### 9. How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+#### 9. How many days on average does it take for a customer to upgrade to an annual plan from the day they join Foodie-Fi?
 
     WITH join_date AS (
       SELECT *
@@ -434,6 +471,17 @@ Insights:
 | avg_days_to_upgrade |
 | ------------------- |
 | 105                 |
+
+Steps:
+- Created a CTE called join_date
+- Took the subscriptions table and filtered for only trial plans because the trial start date is the day they joined Foodie Fi
+- Created another CTE called annual
+- Filtered the subscriptions table for only annual plans to get the start date for the upgrade
+- Joined the two CTEs on the customer_id so only customers who had the pro annual plan were included
+- Found the average of the annual start_date - the trial start_date and rounded to the whole number
+
+Insights:
+- On average, it took customers 105 to upgrade to the pro annual plan from their join date
 
 ---
 
@@ -478,6 +526,19 @@ Insights:
 | 301 - 330     | 327                 |
 | 331 - 360     | 346                 |
 
+Steps:
+- Used the CTEs from the previous question to find the join date and the annual upgrade date
+- Created another CTE called buckets
+- Used WIDTH_BUCKET to create bins. I started the sequence at 1 and ended at 360, and split that into 12 bins, which created 30 day ranges numbered 1 - 12
+- Grouped by buckets
+- Used the bucket CTE to make the bins more readable
+- Used CONCAT to piece together a few values, starting with the bucket number - 1 multiplied by 30 then + 1. For example, the bin number 2 - 1 = 1. 1 * 30 = 30. 30 + 1 = 31. This gives the range starting number.
+- The second value in the CONCAT statement is ' - ' to indicate the range
+- Lastly, I added the end range number by taking the bucket * 30. For example, bin number 2 * 30 = 60. So bin number two would end up looking like '31 - 60'
+
+Insights:
+- This table just shows that if the number of days to upgrade is between a certain range of days, this is the average of how many days it took to upgrade
+
 ---
 
 #### 11. How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
@@ -502,6 +563,16 @@ Insights:
 | -------------- |
 | 0              |
 
+Steps:
+- Used the same method as the previous questions by creating CTEs to find the start dates for the two plans
+- Filtered for only dates in 2020
+- Joined the two CTEs
+- Counted the customer_ids
+- Filtered for dates where the basic monthly start_date was more recent than the pro monthly start_date, indicating a downgrade
+
+Insights:
+- No customers downgraded from the pro monthly plan to the basic monthly plan
+- The pro monthly plan makes customers want to stay where they are
 ---
 
 ### 💵 C. Challenge Payment Question
@@ -515,41 +586,41 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
 
 **Payments Table:**
 
-    WITH lead AS (
-    	SELECT *,
-    		LEAD(start_date) OVER(
-          	PARTITION BY customer_id
-          	ORDER BY customer_id, start_date) AS end_date
-    	FROM foodie_fi.subscriptions
-    	WHERE plan_id <> 0
-    	ORDER BY customer_id)
-    
-    , ending AS (
-      SELECT customer_id,
-      	plan_id,
-      	start_date,
-      	CASE WHEN end_date IS NULL
-      		THEN '2020-12-31'
-      		WHEN start_date = end_date
-      		THEN end_date - 1
-      		ELSE end_date END AS end_date
-      FROM lead
-      ORDER BY customer_id)
-    
-    SELECT e.customer_id,
-    	e.plan_id,
-        p.plan_name,
-        GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month') AS payment_date,
-        p.price,
-        RANK() OVER(
-          PARTITION BY e.customer_id
-          ORDER BY GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month')) AS payment_order
-    FROM ending AS e
-    JOIN foodie_fi.plans AS p
-    ON e.plan_id = p.plan_id
-    WHERE e.plan_id <> 4
-    ORDER BY e.customer_id
-    LIMIT 50;
+        WITH lead AS (
+        	SELECT *,
+        		LEAD(start_date) OVER(
+              	PARTITION BY customer_id
+              	ORDER BY customer_id, start_date) AS end_date
+        	FROM foodie_fi.subscriptions
+        	WHERE plan_id <> 0 AND EXTRACT(year FROM start_date) = '2020'
+        	ORDER BY customer_id)
+        
+        , ending AS (
+          SELECT customer_id,
+          	plan_id,
+          	start_date,
+          	CASE WHEN end_date IS NULL
+          		THEN '2020-12-31'
+          		WHEN EXTRACT(day FROM start_date) = EXTRACT(day FROM end_date)
+          		THEN end_date - INTERVAL '1 day'
+          		ELSE end_date END AS end_date
+          FROM lead
+          ORDER BY customer_id)
+     
+      SELECT e.customer_id,
+        	e.plan_id,
+            p.plan_name,
+            GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month') AS payment_date,
+            p.price,
+            RANK() OVER(
+              PARTITION BY e.customer_id
+              ORDER BY GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month')) AS payment_order
+        FROM ending AS e
+        JOIN foodie_fi.plans AS p
+        ON e.plan_id = p.plan_id
+        WHERE e.plan_id <> 4
+        ORDER BY e.customer_id
+        LIMIT 50;
 
 | customer_id | plan_id | plan_name     | payment_date             | price  | payment_order |
 | ----------- | ------- | ------------- | ------------------------ | ------ | ------------- |
@@ -583,7 +654,6 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
 | 5           | 1       | basic monthly | 2020-11-10T00:00:00.000Z | 9.90   | 4             |
 | 5           | 1       | basic monthly | 2020-12-10T00:00:00.000Z | 9.90   | 5             |
 | 6           | 1       | basic monthly | 2020-12-30T00:00:00.000Z | 9.90   | 1             |
-| 6           | 1       | basic monthly | 2021-01-30T00:00:00.000Z | 9.90   | 2             |
 | 7           | 1       | basic monthly | 2020-02-12T00:00:00.000Z | 9.90   | 1             |
 | 7           | 1       | basic monthly | 2020-03-12T00:00:00.000Z | 9.90   | 2             |
 | 7           | 1       | basic monthly | 2020-04-12T00:00:00.000Z | 9.90   | 3             |
@@ -603,7 +673,35 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
 | 8           | 2       | pro monthly   | 2020-10-03T00:00:00.000Z | 19.90  | 5             |
 | 8           | 2       | pro monthly   | 2020-11-03T00:00:00.000Z | 19.90  | 6             |
 | 8           | 2       | pro monthly   | 2020-12-03T00:00:00.000Z | 19.90  | 7             |
+| 9           | 3       | pro annual    | 2020-12-14T00:00:00.000Z | 199.00 | 1             |
 
+
+Steps:
+- CTE #1
+    - Took the subscriptions table and added a LEAD column where the start_date is moved up one place
+    - Partitioned by the customer_id
+    - Ordered by the customer_id and the start_date
+    - This shows the end date of the current subscription because it is the start date of the next plan
+    - Filtered out trial plans because they are free and don't require payments
+- CTE #2
+    - Selected the appropriate columns from the previous CTE
+    - Created a CASE statement with a few arguments. If the end_date of the plan was *null*, that means that there is no end date and this is the plan the customer ended the year with. In this case, the date was set to 2020-12-31. Next, I noticed that if the day of the month in the start and end date were the same, the series I create later will continue on with both plans instead of stopping one and starting the next. To fix this I said that if the day in both dates match, then subtract 1 day from the end date.
+- Final Query
+     - Joined the previous CTE to the plans table
+     - Selected the appropriate columns
+     - Used GENERATE_SERIES to show each month between the start_date and end_date of a particular plan
+     - Used RANK to show the payment numbers
+     - Partitioned by the customer_id
+     - Ordered by the dates in the series
+     - Limited the results to just 50 records. The table above is just a sample of the full table with all of the customers included
+
+Insights:
+- This table is a great resource for tracking each individual payment made to Foodie Fi
+- There are a lot of different metrics that can be run from this table, such as
+    - Total profit for the year
+    - Total profit for a particular month
+    - Total profit for an individual plan
+    - Example: Total profit made from the pro monthly plan in October
 ---
 
 ### 🔥 D. Outside the Box Questions
@@ -624,8 +722,8 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
       	start_date,
       	CASE WHEN end_date IS NULL
       		THEN '2020-12-31'
-      		WHEN start_date = end_date
-      		THEN end_date - 1
+      		WHEN EXTRACT(day FROM start_date) = EXTRACT(day FROM end_date)
+          	THEN end_date - INTERVAL '1 day'
       		ELSE end_date END AS end_date
       FROM lead
       ORDER BY customer_id)
@@ -653,72 +751,54 @@ The Foodie-Fi team wants you to create a new payments table for the year 2020 th
 
 | month | customer_count |
 | ----- | -------------- |
-| 1     | 216            |
-| 12    | 752            |
+| 1     | 201            |
+| 12    | 751            |
 
 
-    SELECT ((752 - 216) / 216) * 100 AS customer_growth_rate_percentage;
+   SELECT ROUND(((751::numeric - 201::numeric) / 201::numeric) * 100, 2) AS customer_growth_rate_percentage;
 
 | customer_growth_rate_percentage |
 | ------------------------------- |
-| 200                             |
+| 273.63                          |
 
 
-    WITH lead AS (
-    	SELECT *,
-    		LEAD(start_date) OVER(
-          	PARTITION BY customer_id
-          	ORDER BY customer_id, start_date) AS end_date
-    	FROM foodie_fi.subscriptions
-    	WHERE plan_id <> 0
-    	ORDER BY customer_id)
-    
-    , ending AS (
-      SELECT customer_id,
-      	plan_id,
-      	start_date,
-      	CASE WHEN end_date IS NULL
-      		THEN '2020-12-31'
-      		WHEN start_date = end_date
-      		THEN end_date - 1
-      		ELSE end_date END AS end_date
-      FROM lead
-      ORDER BY customer_id)
-    
-    , payments AS (
-      SELECT e.customer_id,
-    	e.plan_id,
-        p.plan_name,
-        GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month') AS payment_date,
-        p.price,
-        RANK() OVER(
-          PARTITION BY e.customer_id
-          ORDER BY GENERATE_SERIES(e.start_date, e.end_date, INTERVAL '1 month')) AS payment_order
-      FROM ending AS e
-      JOIN foodie_fi.plans AS p
-      ON e.plan_id = p.plan_id
-      WHERE e.plan_id <> 4
-      ORDER BY e.customer_id)
-    
-    SELECT EXTRACT(month FROM payment_date) AS month,
-    	SUM(price) AS profit
-    FROM payments
-    WHERE EXTRACT(month FROM payment_date) IN (1, 12)
-    GROUP BY EXTRACT(month FROM payment_date);
+There are a couple of ways to calculate the rate of growth of Foodie Fi. The method above calculates the rate of growth of active customers at the beginning of 2020 compared to the end of 2020. I counted an active customer as someone who was making payments.
+
+Steps:
+- I used the Payments Table that I created above and turned the final query into a CTE
+- Used that CTE to extract the month from the payments that were made
+- Counted the distinct number of customers
+- Filtered for only customers who made payments in month 1 or 12
+- Grouped by the month to get the number of active customers in January and December
+- Used the growth rate formula and the numbers I just found to get a 200.63% growth rate in active customers from the beginning of 2020 to the end of 2020
+---
+
+     SELECT EXTRACT(month FROM payment_date) AS month,
+        	SUM(price) AS profit
+        FROM payments
+        WHERE EXTRACT(month FROM payment_date) IN (1, 12)
+        GROUP BY EXTRACT(month FROM payment_date)
+        ORDER BY EXTRACT(month FROM payment_date);
 
 | month | profit   |
 | ----- | -------- |
-| 12    | 47907.20 |
-| 1     | 4620.60  |
+| 1     | 4342.10  |
+| 12    | 47718.20 |
 
 
 
-    SELECT ROUND(((47907.20 - 4620.60) / 4620.60) * 100, 0) AS profit_growth_rate_percentage;
+
+   SELECT ROUND(((47718.20::numeric - 4342.10::numeric) / 4342.10::numeric) * 100, 2) AS customer_growth_rate_percentage;
 
 | profit_growth_rate_percentage |
 | ----------------------------- |
-| 937                           |
+| 998.97                        |
 
+Another way to calulate the growth rate of Foodie Fi is to calculate the growth rate in profit from the beginning of 2020 to the end of 2020
+
+Steps:
+- Used the Payments Table and the same method as before, but instead of counting customers, I found the sum of the prices to find the total profit
+- Again, used the growth rate formula to find a 998.97% increase in profit from the beginning of 2020 to the end of 2020
 ---
 
 ## 🚀 Final Thoughts
