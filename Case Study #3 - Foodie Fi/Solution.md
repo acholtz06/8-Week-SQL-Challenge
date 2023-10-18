@@ -847,7 +847,16 @@ Steps:
 
 I really liked how this case study made me think in a completely different way as compared to the last one. The Pizza Runner case study was very SQL heavy and much more difficult as far as the code goes, but this one switched gears to focus a bit more on business intelligence. The last section of Outside the Box Questions was a great way to show how the data analysis results can be applied in a real life business situation. The analysis we did here was great to give the steakholder a snapshot of what is going on and how the business is performing, but without knowing why there were no new trial members in 2021 or why only 2% of customers have the pro annual plan, it is hard to make any suggestions on how to improve these numbers without futher investigation. The last section really helped dig into next steps, like sending out a customer survey and trying to reduce customer churn rate. After that, there is already a plan on how to track these changes to see if they are effective. Hopefully Danny starts to see a lower churn rate after these changes and even more plan upgrades.
 
-Thank you so much for following along on another Data With Danny case study!
+Thank you so much for following along!   
+Check out my other Data With Danny solutions:  
+- [Case Study #1 - Danny's Diner](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%231%20-%20Danny's%20Diner/Solution.md)
+- [Case Study #2 - Pizza Runner](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%232%20-%20Pizza%20Runner/Solution.md)
+- [Case Study #4 - Data Bank](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%234%20-%20Data%20Bank/Solution.md)
+- [Case Study #5 - Data Mart](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%235%20-%20Data%20Mart/Solution.md)
+- [Case Study #6 - Clique Bait](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%236%20-%20Clique%20Bait/Solution.md)
+- [Case Study #7 - Balanced Tree Clothing Co.](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%237%20-%20Balanced%20Tree%20Clothing%20Co./Solution.md)
+- [Case Study #8 - Fresh Segments](https://github.com/acholtz06/8-Week-SQL-Challenge/blob/main/Case%20Study%20%238%20-%20Fresh%20Segments/Solution.md)
+
 
 
 
