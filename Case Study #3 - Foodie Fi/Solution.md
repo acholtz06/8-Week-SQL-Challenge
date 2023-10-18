@@ -803,19 +803,51 @@ Steps:
 
 #### 2. What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
 
+- Number of new members per month
+- Number of customers who cancel their subscription each week or month
+    - Those who churn right after the free trial
+    - Those who churn after paying for a plan
+- Amount of times customers upgrade to each of the different plans 
+- Total active members per month
+
 ---
 
 #### 3. What are some key customer journeys or experiences that you would analyse further to improve customer retention?
+
+- Customers who have upgraded to a paid plan at some point but then cancel their subscription
+- Any customers who might have downgraded their plan
+- Customers who have a paid plan and then decide to upgrade to a higher plan
 
 ---
 
 #### 4. If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
 
+- How would you rate the content available on Foodie Fi on a scale of 1 - 5 (1 being the worst and 5 being the best)
+- How would you rate the value of (their specific subscription plan) on a scale of 1 - 5 (1 being the worst and 5 being the best)
+- Was there any content you felt should have been included on Foodie Fi but was not available?
+- How would you rate the Foodie Fi app on a scale of 1 - 5 (1 being the worst and 5 being the best)
+- Are there any changes you would make to the Foodie Fi app?
+
 ---
 
 #### 5. What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
 
+- Send out a weekly e-mail highlighting any new or significant content
+    - This could be validated through A/B testing where retention numbers are compared between customers who receive the e-mail and those who do not
+- Occasional promotions for discounted upgrade rates (such as $5 off per month for a year)
+    - I feel like this could be used to target the customers who sign up for the free trial and then immediately cancel. A promotion might entice them into upgrading their plan instead of cancelling
+    - This can be validated by seeing if there is an increase in plan upgrades while the promotion is running
+    - This can also be checked afer the promotional period has ended to see if more customers cancel their subscription after the payment goes back up
+- Offering discounts on plans to customers who are wanting to cancel their subscriptions
+    - This can be validated by comparing the churn rate over time against the churn rate after a discount is offered
+
 ---
 
 ## 🚀 Final Thoughts
+
+I really liked how this case study made me think in a completely different way as compared to the last one. The Pizza Runner case study was very SQL heavy and much more difficult as far as the code goes, but this one switched gears to focus a bit more on business intelligence. The last section of Outside the Box Questions was a great way to show how the data analysis results can be applied in a real life business situation. The analysis we did here was great to give the steakholder a snapshot of what is going on and how the business is performing, but without knowing why there were no new trial members in 2021 or why only 2% of customers have the pro annual plan, it is hard to make any suggestions on how to improve these numbers without futher investigation. The last section really helped dig into next steps, like sending out a customer survey and trying to reduce customer churn rate. After that, there is already a plan on how to track these changes to see if they are effective. Hopefully Danny starts to see a lower churn rate after these changes and even more plan upgrades.
+
+Thank you so much for following along on another Data With Danny case study!
+
+
 
