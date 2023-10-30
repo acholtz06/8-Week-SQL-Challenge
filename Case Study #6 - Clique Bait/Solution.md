@@ -1,14 +1,14 @@
-# Case Study #6 - Clique Bait
+# 🎣 Case Study #6 - Clique Bait
 
 ![Clique Bait PIcture](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/60554132-d756-4b27-ac8b-28f4fad59faa)
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-6/)
 
-## Table of Contents
-## Business Task
-## Data Limitations
-## Data
-## Case Study Questions
-### A. Digital Analysis
+## 📚 Table of Contents
+## 🦀 Business Task
+## ⚠️ Data Limitations
+## 🦪 Data
+## 🐟 Case Study Questions
+### 🦞 A. Digital Analysis
 ---
 
 #### 1. How many users are there?
@@ -181,6 +181,6 @@
 
 ---
 
-### B. Product Funnel Analysis
-### C. Campaigns Analysis
-## Final Thoughts
+### 🦐 B. Product Funnel Analysis
+### 🦑 C. Campaigns Analysis
+## 🚀 Final Thoughts
