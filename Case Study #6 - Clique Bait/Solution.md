@@ -1,3 +1,6 @@
+
+## Case Study Questions
+### A. Digital Analysis
 ---
 
 #### 1. How many users are there?
@@ -169,3 +172,6 @@
 | Crab    | 719             |
 
 ---
+
+### B. Product Funnel Analysis
+### C. Campaigns Analysis
