@@ -4,7 +4,15 @@
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-6/)
 
 ## 📚 Table of Contents
-- [Business Task](#%EF%B8%8F-business-task)
+- [Business Task](#-business-task)
+- [Data Limitations](#%EF%B8%8F-data-limitations)
+- [Data](#-data)
+- [Case Study Questions](#-case-study-questions)
+    - [A. Digital Analysis](#-a-digital-analysis)
+    - [B. Product Funnel Analysis](#-b-product-funnel-analysis)
+    - [C. Campaigns Analysis](#-c-campaigns-analysis)
+- [Final Thoughts](#-final-thoughts)
+  
 ## 🦀 Business Task
 ## ⚠️ Data Limitations
 ## 🦪 Data
