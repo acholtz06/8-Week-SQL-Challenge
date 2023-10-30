@@ -4,6 +4,7 @@
 ###### All data and case study questions were taken from Data With Danny and can be found [here](https://8weeksqlchallenge.com/case-study-6/)
 
 ## 📚 Table of Contents
+- [Business Task](#%EF%B8%8F-business-task)
 ## 🦀 Business Task
 ## ⚠️ Data Limitations
 ## 🦪 Data
