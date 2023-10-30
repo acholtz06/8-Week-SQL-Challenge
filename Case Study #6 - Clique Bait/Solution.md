@@ -1,3 +1,6 @@
+# Case Study #6 - Clique Bait
+
+![Clique Bait PIcture](https://github.com/acholtz06/8-Week-SQL-Challenge/assets/110953602/60554132-d756-4b27-ac8b-28f4fad59faa)
 
 ## Case Study Questions
 ### A. Digital Analysis
