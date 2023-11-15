@@ -191,5 +191,108 @@
 ---
 
 ### 🦐 B. Product Funnel Analysis
+
+---
+
+**Query #1**
+
+    DROP TABLE IF EXISTS products;
+
+    CREATE TABLE products (
+      product_name VARCHAR,
+      times_viewed INT,
+      times_added_to_cart INT,
+      times_abandoned INT,
+      times_purchased INT
+      );
+
+    WITH cte AS (
+      SELECT h.page_name AS product_name,
+    	COUNT(e.page_id) AS times_viewed
+      FROM clique_bait.events AS e
+      JOIN clique_bait.page_hierarchy AS h
+      ON e.page_id = h.page_id
+      WHERE e.page_id NOT IN (1, 2, 12, 13) AND e.event_type = 1
+      GROUP BY h.page_name
+      ORDER BY h.page_name)
+      
+    , cte2 AS (
+      SELECT h.page_name AS product_name,
+      	COUNT(e.event_type) AS times_added_to_cart
+      FROM clique_bait.events AS e
+      JOIN clique_bait.page_hierarchy AS h
+      ON e.page_id = h.page_id
+      WHERE e.event_type = 2
+      GROUP BY h.page_name
+      ORDER BY h.page_name)
+      
+    , purchases AS (
+      SELECT visit_id,
+    	event_type AS purchased
+      FROM clique_bait.events
+      WHERE event_type = 3)
+      
+    , cart AS (
+      SELECT e.visit_id,
+    	e.event_type,
+        e.page_id
+      FROM clique_bait.events AS e
+      JOIN purchases AS p
+      ON e.visit_id = p.visit_id
+      WHERE e.event_type = 2)
+    
+    , num_pur AS (
+      SELECT h.page_name AS product_name,
+    	COUNT(c.visit_id) AS times_purchased
+      FROM cart AS c
+      JOIN clique_bait.page_hierarchy AS h
+      ON c.page_id = h.page_id
+      GROUP BY product_name
+      ORDER BY product_name)
+    
+    , abandon AS (
+      SELECT c.product_name,
+    	c.times_added_to_cart - p.times_purchased AS times_abandoned
+      FROM cte2 AS c
+      JOIN num_pur AS p
+      ON c.product_name = p.product_name
+      ORDER BY c.product_name)
+    
+    , final AS (
+      SELECT v.product_name,
+    	v.times_viewed,
+        c.times_added_to_cart,
+        a.times_abandoned,
+        p.times_purchased
+      FROM cte AS v
+      JOIN cte2 AS c
+      ON v.product_name = c.product_name
+      JOIN abandon AS a
+      ON c.product_name = a.product_name
+      JOIN num_pur AS p
+      ON a.product_name = p.product_name
+      ORDER BY v.product_name)
+      
+    INSERT INTO products
+    (product_name, times_viewed, times_added_to_cart, times_abandoned, times_purchased)
+    SELECT product_name, times_viewed, times_added_to_cart, times_abandoned, times_purchased
+    FROM final;
+
+    SELECT *
+    FROM products;
+
+| product_name   | times_viewed | times_added_to_cart | times_abandoned | times_purchased |
+| -------------- | ------------ | ------------------- | --------------- | --------------- |
+| Abalone        | 1525         | 932                 | 233             | 699             |
+| Black Truffle  | 1469         | 924                 | 217             | 707             |
+| Crab           | 1564         | 949                 | 230             | 719             |
+| Kingfish       | 1559         | 920                 | 213             | 707             |
+| Lobster        | 1547         | 968                 | 214             | 754             |
+| Oyster         | 1568         | 943                 | 217             | 726             |
+| Russian Caviar | 1563         | 946                 | 249             | 697             |
+| Salmon         | 1559         | 938                 | 227             | 711             |
+| Tuna           | 1515         | 931                 | 234             | 697             |
+
+---
 ### 🦑 C. Campaigns Analysis
 ## 🚀 Final Thoughts
