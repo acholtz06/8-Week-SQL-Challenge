@@ -192,9 +192,13 @@
 
 ### 🦐 B. Product Funnel Analysis
 
----
+#### Using a single SQL query - create a new output table which has the following details:  
+**- How many times was each product viewed?**  
+**- How many times was each product added to cart?**   
+**- How many times was each product added to a cart but not purchased (abandoned)?**  
+**- How many times was each product purchased?**  
 
-**Query #1**
+---
 
     DROP TABLE IF EXISTS products;
 
@@ -295,7 +299,9 @@
 
 ---
 
-**Query #5**
+#### Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
+
+---
 
     DROP TABLE IF EXISTS product_categories;
 
@@ -388,6 +394,90 @@
 | Fish             | 4633         | 2789                | 674             | 2115            |
 | Luxury           | 3032         | 1870                | 466             | 1404            |
 | Shellfish        | 6204         | 3792                | 894             | 2898            |
+
+---
+
+#### Use your 2 new output tables - answer the following questions:  
+
+#### 1. Which product had the most views, cart adds and purchases?
+
+    SELECT product_name,
+    	times_viewed
+    FROM products
+    ORDER BY times_viewed DESC
+    LIMIT 1;
+
+| product_name | times_viewed |
+| ------------ | ------------ |
+| Oyster       | 1568         |
+
+
+    SELECT product_name,
+    	times_added_to_cart
+    FROM products
+    ORDER BY times_added_to_cart DESC
+    LIMIT 1;
+
+| product_name | times_added_to_cart |
+| ------------ | ------------------- |
+| Lobster      | 968                 |
+
+
+    SELECT product_name,
+    	times_purchased
+    FROM products
+    ORDER BY times_purchased DESC
+    LIMIT 1;
+
+| product_name | times_purchased |
+| ------------ | --------------- |
+| Lobster      | 754             |
+
+---
+#### 2. Which product was most likely to be abandoned?
+
+    SELECT product_name,
+    	times_abandoned
+    FROM products
+    ORDER BY times_abandoned DESC
+    LIMIT 1;
+
+| product_name   | times_abandoned |
+| -------------- | --------------- |
+| Russian Caviar | 249             |
+
+---
+#### 3. Which product had the highest view to purchase percentage?
+
+    SELECT product_name,
+    	ROUND((times_purchased::NUMERIC / times_viewed::NUMERIC) * 100, 2) AS percentage
+    FROM products
+    ORDER BY percentage DESC
+    LIMIT 1;
+
+| product_name | percentage |
+| ------------ | ---------- |
+| Lobster      | 48.74      |
+
+---
+#### 4. What is the average conversion rate from view to cart add?
+
+    SELECT ROUND(AVG((times_added_to_cart::NUMERIC / times_viewed::NUMERIC) * 100), 2) AS conv_view_to_cart_add
+    FROM products;
+
+| conv_view_to_cart_add |
+| --------------------- |
+| 60.95                 |
+
+---
+#### 5. What is the average conversion rate from cart add to purchase?
+
+    SELECT ROUND(AVG((times_purchased::NUMERIC / times_added_to_cart::NUMERIC) * 100), 2) AS conv_add_cart_to_pur
+    FROM products;
+
+| conv_add_cart_to_pur |
+| -------------------- |
+| 75.93                |
 
 ---
 ### 🦑 C. Campaigns Analysis
