@@ -294,5 +294,101 @@
 | Tuna           | 1515         | 931                 | 234             | 697             |
 
 ---
+
+**Query #5**
+
+    DROP TABLE IF EXISTS product_categories;
+
+    CREATE TABLE product_categories (
+      product_category VARCHAR,
+      times_viewed INT,
+      times_added_to_cart INT,
+      times_abandoned INT,
+      times_purchased INT
+      );
+
+    WITH cte AS (
+      SELECT h.product_category,
+    	COUNT(e.page_id) AS times_viewed
+      FROM clique_bait.events AS e
+      JOIN clique_bait.page_hierarchy AS h
+      ON e.page_id = h.page_id
+      WHERE e.page_id NOT IN (1, 2, 12, 13) AND e.event_type = 1
+      GROUP BY h.product_category
+      ORDER BY h.product_category)
+      
+    , cte2 AS (
+      SELECT h.product_category,
+      	COUNT(e.event_type) AS times_added_to_cart
+      FROM clique_bait.events AS e
+      JOIN clique_bait.page_hierarchy AS h
+      ON e.page_id = h.page_id
+      WHERE e.event_type = 2
+      GROUP BY h.product_category
+      ORDER BY h.product_category)
+      
+    , purchases AS (
+      SELECT visit_id,
+    	event_type AS purchased
+      FROM clique_bait.events
+      WHERE event_type = 3)
+      
+    , cart AS (
+      SELECT e.visit_id,
+    	e.event_type,
+        e.page_id
+      FROM clique_bait.events AS e
+      JOIN purchases AS p
+      ON e.visit_id = p.visit_id
+      WHERE e.event_type = 2)
+    
+    , num_pur AS (
+      SELECT h.product_category,
+    	COUNT(c.visit_id) AS times_purchased
+      FROM cart AS c
+      JOIN clique_bait.page_hierarchy AS h
+      ON c.page_id = h.page_id
+      GROUP BY product_category
+      ORDER BY product_category)
+    
+    , abandon AS (
+      SELECT c.product_category,
+    	c.times_added_to_cart - p.times_purchased AS times_abandoned
+      FROM cte2 AS c
+      JOIN num_pur AS p
+      ON c.product_category = p.product_category
+      ORDER BY c.product_category)
+    
+    , final AS (
+      SELECT v.product_category,
+    	v.times_viewed,
+        c.times_added_to_cart,
+        a.times_abandoned,
+        p.times_purchased
+      FROM cte AS v
+      JOIN cte2 AS c
+      ON v.product_category = c.product_category
+      JOIN abandon AS a
+      ON c.product_category = a.product_category
+      JOIN num_pur AS p
+      ON a.product_category = p.product_category
+      ORDER BY v.product_category)
+      
+    INSERT INTO product_categories
+    (product_category, times_viewed, times_added_to_cart, times_abandoned, times_purchased)
+    SELECT product_category, times_viewed, times_added_to_cart, times_abandoned, times_purchased
+    FROM final;
+
+
+    SELECT *
+    FROM product_categories;
+
+| product_category | times_viewed | times_added_to_cart | times_abandoned | times_purchased |
+| ---------------- | ------------ | ------------------- | --------------- | --------------- |
+| Fish             | 4633         | 2789                | 674             | 2115            |
+| Luxury           | 3032         | 1870                | 466             | 1404            |
+| Shellfish        | 6204         | 3792                | 894             | 2898            |
+
+---
 ### 🦑 C. Campaigns Analysis
 ## 🚀 Final Thoughts
