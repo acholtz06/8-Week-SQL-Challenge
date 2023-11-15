@@ -494,4 +494,83 @@
 **- impression: count of ad impressions for each visit**  
 **- click: count of ad clicks for each visit**  
 **- (Optional column) cart_products: a comma separated text value with products added to the cart sorted by the order they were added to the cart (hint: use the sequence_number)**  
+
+---
+
+    DROP TABLE IF EXISTS visits;
+
+    CREATE TABLE visits (
+      visit_id VARCHAR,
+      user_id INT,
+      visit_start_time TIMESTAMP,
+      page_views INT,
+      cart_adds INT,
+      purchase INT,
+      campaign_name VARCHAR,
+      impression INT,
+      ad_clicks INT,
+      cart_products VARCHAR
+     );
+
+    WITH cte AS (
+      SELECT 
+    	DISTINCT e.visit_id AS visit_id,
+        u.user_id,
+        MIN(e.event_time) AS visit_start_time,
+        SUM(CASE WHEN e.event_type = 1 THEN 1 ELSE 0 END) AS page_views,
+        SUM(CASE WHEN e.event_type = 2 THEN 1 ELSE 0 END) AS cart_adds,
+        SUM(CASE WHEN e.event_type = 3 THEN 1 ELSE 0 END) AS purchase,
+        CASE WHEN MIN(e.event_time) BETWEEN '2020-01-01' AND '2020-01-14'
+        	THEN 'BOGOF - Fishing For Compliments'
+            WHEN MIN(e.event_time) BETWEEN '2020-01-15' AND '2020-01-28'
+            THEN '25% Off - Living The Lux Life'
+            WHEN MIN(e.event_time) BETWEEN '2020-02-01' AND '2020-03-31'
+            THEN 'Half Off - Treat Your Shellf(ish)'
+            ELSE NULL END AS campaign_name,
+    	SUM(CASE WHEN e.event_type = 4 THEN 1 ELSE 0 END) AS impression,
+        SUM(CASE WHEN e.event_type = 5 THEN 1 ELSE 0 END) AS ad_clicks,
+        STRING_AGG((CASE WHEN e.event_type = 2 THEN h.page_name ELSE NULL END), ', ') AS cart_products
+      FROM clique_bait.events AS e
+      JOIN clique_bait.users AS u
+      ON e.cookie_id = u.cookie_id
+      JOIN clique_bait.page_hierarchy AS h
+      ON e.page_id = h.page_id
+      GROUP BY visit_id, u.user_id
+      ORDER BY visit_id)
+      
+    INSERT INTO visits
+    (visit_id, user_id, visit_start_time, page_views, cart_adds, purchase, campaign_name, impression, ad_clicks, cart_products)
+    SELECT visit_id, user_id, visit_start_time, page_views, cart_adds, purchase, campaign_name, impression, ad_clicks, cart_products
+    FROM cte;
+
+    SELECT *
+    FROM visits
+    LIMIT 20;
+
+| visit_id | user_id | visit_start_time         | page_views | cart_adds | purchase | campaign_name                     | impression | ad_clicks | cart_products                                                                   |
+| -------- | ------- | ------------------------ | ---------- | --------- | -------- | --------------------------------- | ---------- | --------- | ------------------------------------------------------------------------------- |
+| 001597   | 155     | 2020-02-17T00:21:45.295Z | 10         | 6         | 1        | Half Off - Treat Your Shellf(ish) | 1          | 1         | Russian Caviar, Black Truffle, Crab, Lobster, Oyster, Salmon                    |
+| 002809   | 243     | 2020-03-13T17:49:55.459Z | 4          | 0         | 0        | Half Off - Treat Your Shellf(ish) | 0          | 0         |                                                                                 |
+| 0048b2   | 78      | 2020-02-10T02:59:51.335Z | 6          | 4         | 0        | Half Off - Treat Your Shellf(ish) | 0          | 0         | Lobster, Abalone, Kingfish, Russian Caviar                                      |
+| 004aaf   | 228     | 2020-03-18T13:23:07.973Z | 6          | 2         | 1        | Half Off - Treat Your Shellf(ish) | 0          | 0         | Tuna, Lobster                                                                   |
+| 005fe7   | 237     | 2020-04-02T18:14:08.257Z | 9          | 4         | 1        |                                   | 0          | 0         | Oyster, Kingfish, Black Truffle, Crab                                           |
+| 006a61   | 420     | 2020-01-25T20:54:14.630Z | 9          | 5         | 1        | 25% Off - Living The Lux Life     | 1          | 1         | Tuna, Crab, Black Truffle, Abalone, Russian Caviar                              |
+| 006e8c   | 252     | 2020-02-21T03:14:44.965Z | 1          | 0         | 0        | Half Off - Treat Your Shellf(ish) | 0          | 0         |                                                                                 |
+| 006f7f   | 20      | 2020-02-23T01:36:34.786Z | 5          | 1         | 1        | Half Off - Treat Your Shellf(ish) | 1          | 1         | Tuna                                                                            |
+| 007330   | 436     | 2020-01-07T22:30:35.775Z | 11         | 8         | 1        | BOGOF - Fishing For Compliments   | 1          | 1         | Black Truffle, Lobster, Abalone, Tuna, Oyster, Kingfish, Russian Caviar, Salmon |
+| 009e0e   | 161     | 2020-02-20T06:17:50.907Z | 8          | 5         | 0        | Half Off - Treat Your Shellf(ish) | 0          | 0         | Kingfish, Black Truffle, Abalone, Tuna, Lobster                                 |
+| 00b0a0   | 101     | 2020-05-17T06:29:28.529Z | 7          | 3         | 1        |                                   | 0          | 0         | Tuna, Lobster, Crab                                                             |
+| 00b161   | 50      | 2020-03-15T00:24:29.191Z | 11         | 6         | 1        | Half Off - Treat Your Shellf(ish) | 1          | 1         | Abalone, Crab, Tuna, Kingfish, Oyster, Lobster                                  |
+| 00c08c   | 326     | 2020-02-09T06:50:09.453Z | 7          | 1         | 1        | Half Off - Treat Your Shellf(ish) | 1          | 0         | Abalone                                                                         |
+| 00fb4a   | 282     | 2020-03-20T22:57:13.601Z | 6          | 0         | 0        | Half Off - Treat Your Shellf(ish) | 0          | 0         |                                                                                 |
+| 010e34   | 213     | 2020-01-18T17:41:09.677Z | 1          | 0         | 0        | 25% Off - Living The Lux Life     | 0          | 0         |                                                                                 |
+| 011e83   | 158     | 2020-03-04T19:37:19.989Z | 6          | 2         | 1        | Half Off - Treat Your Shellf(ish) | 0          | 0         | Lobster, Salmon                                                                 |
+| 012599   | 429     | 2020-02-17T07:56:15.329Z | 1          | 0         | 0        | Half Off - Treat Your Shellf(ish) | 0          | 0         |                                                                                 |
+| 01573b   | 208     | 2020-01-30T12:41:23.073Z | 6          | 2         | 1        |                                   | 0          | 0         | Lobster, Black Truffle                                                          |
+| 016012   | 120     | 2020-02-14T07:41:49.486Z | 8          | 2         | 1        | Half Off - Treat Your Shellf(ish) | 0          | 0         | Salmon, Crab                                                                    |
+| 0186ac   | 454     | 2020-02-20T23:30:13.675Z | 9          | 6         | 1        | Half Off - Treat Your Shellf(ish) | 1          | 1         | Salmon, Kingfish, Russian Caviar, Abalone, Black Truffle, Crab                  |
+
+---
+#### Use the subsequent dataset to generate at least 5 insights for the Clique Bait team - bonus: prepare a single A4 infographic that the team can use for their management reporting sessions, be sure to emphasise the most important points from your findings.
+
 ## 🚀 Final Thoughts
